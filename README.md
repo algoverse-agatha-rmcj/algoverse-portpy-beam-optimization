@@ -5,12 +5,4 @@ radiotherapy beam-angle optimization by testing alternative optimization techniq
 (genetic algorithm, simulated annealing, memetic algorithm) on the open-source
 [PortPy](https://github.com/PortPy-Project/PortPy) prostate-cancer benchmark dataset.
 
-## Team
-- Milen Popat
-- Carolina
-- Jordan Wunnenberg
-- Raj Patel
-- Mentor: Agatha Mattos
 
-## Status
-Research proposal in progress. No code yet.
