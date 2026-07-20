@@ -22,7 +22,9 @@ There are **two separate git repos**, kept side-by-side in one parent folder:
 <some-folder>/                              <- e.g. C:\Users\<you>\Downloads
 ├── algoverse-portpy-beam-optimization/     <- OUR project repo (this guide + our BAO code)
 │   ├── scripts/
-│   │   └── download_patient_data.py
+│   │   ├── download_patient_data.py
+│   │   └── patch_portpy_downsampler.py
+│   ├── ga_bao.py                            <- the genetic-algorithm BAO experiment
 │   └── TEAM_SETUP.md                        <- this file
 ├── PortPy/                                  <- upstream PortPy, cloned SEPARATELY (branch: research-v1.1.4)
 │   └── examples/                            <- the notebooks you run
@@ -74,10 +76,13 @@ Your prompt should now start with `(portpy)`. Everything below runs **inside thi
 
 ```bash
 pip install "portpy[mosek,data]" jupyter ipykernel
+pip install patchify            # needed for voxel down-sampling (the BAO benchmark)
+pip install "numpy==2.4.6"      # re-pin: patchify tries to downgrade numpy, which breaks cvxpy
 ```
 
 - `portpy[mosek,data]` = PortPy core (NumPy/SciPy/CVXPy/Matplotlib/pandas/h5py) **+ MOSEK + the HuggingFace downloader (`huggingface_hub`) + pydicom**.
 - We deliberately **avoid `portpy[all]`** — it pulls the full PyTorch/deep-learning stack (~2+ GB) that the BAO work doesn't need. (Only add it if you plan to run the AI dose-prediction notebooks.)
+- **`patchify`** is required to down-sample the influence matrix (used by both the GA and the MILP benchmark); it isn't in `[mosek,data]`. ⚠️ Installing it downgrades numpy to <2, which breaks cvxpy — so we immediately re-pin `numpy==2.4.6` (patchify still works fine with numpy 2). pip may print a harmless dependency-conflict warning; ignore it.
 - `jupyter ipykernel` = needed to run notebooks and register the kernel (step 4).
 
 Sanity check:
@@ -127,6 +132,23 @@ git checkout -b research-v1.1.4 v1.1.4
 > `portpy/photon/vmat_scp/vmat_scp_optimization.py`) that raises a `SyntaxError` on
 > Python 3.11 — the notebooks won't even import. The `v1.1.4` **tag** is clean on 3.11
 > and matches the pip package, giving us a stable, reproducible base.
+
+---
+
+## 5b. Apply the PortPy down-sampler patch (required for BAO)
+
+PortPy v1.1.4's down-sampler crashes on the current dataset format
+(`TypeError: only 0-dimensional arrays can be converted to Python scalars`).
+Down-sampling is required for the beam-angle-optimization benchmark (both the GA
+and the MILP), so apply our one-line patch to the installed package. It's
+idempotent and makes a `.orig_backup`:
+
+```bash
+python scripts/patch_portpy_downsampler.py
+```
+
+Expect `patched successfully` (or `Already patched`). **Re-run it after any
+`pip install`/reinstall of PortPy**, since that restores the unpatched file.
 
 ---
 
@@ -190,6 +212,31 @@ If cells 3–13 run and you get a DVH plot and a clinical-criteria table, **you'
 
 ---
 
+## 9. Running the beam-angle-optimization GA
+
+`ga_bao.py` runs the genetic algorithm. It needs the **full candidate beam pool**,
+so download a patient with `--beam-mode all` first (larger download):
+
+```bash
+# from the project repo root, portpy env active, AFTER steps 3 (patchify) + 5b (patch)
+python scripts/download_patient_data.py Lung_Patient_3 --beam-mode all
+python ga_bao.py --patient Lung_Patient_3 --k 7 --pop 20 --gens 40
+```
+
+Results (best angles, per-generation history, timing) are written to
+`ga_results.json`. Useful flags: `--pool` (candidate angles), `--k` (beam budget),
+`--pop` / `--gens` (search size = compute budget), `--mutation-rate`, `--seed`.
+
+**Where to modify the code** (`ga_bao.py`):
+- **the fitness** → `BAOProblem.evaluate()` (e.g. swap `prob.value` for a clinical score)
+- **the GA operators** → Section 2 (`tournament`, `crossover`, `mutate`)
+- **the loop / elitism / termination** → `run_ga()` in Section 3
+
+> First run is slow: the one-time down-sample (~minutes) happens before the GA
+> starts. Each fitness evaluation after that is a ~10 s MOSEK solve.
+
+---
+
 ## Troubleshooting
 
 **`SyntaxError: f-string: unmatched '['` on import** → Your PortPy clone is on `master` with
@@ -214,6 +261,16 @@ notebooks expect. Confirm the patient folder is at `<parent>/data/<patient>` —
 **MOSEK errors** → Confirm `mosek.lic` is at `~/mosek/mosek.lic` and not expired. Re-run
 the verify command in step 6. Free academic licenses are time-limited; renew when needed.
 
+**`TypeError: only 0-dimensional arrays can be converted to Python scalars`** (during
+down-sampling) → PortPy's down-sampler bug on the current data format. Apply the patch:
+`python scripts/patch_portpy_downsampler.py` (step 5b).
+
+**`ModuleNotFoundError: No module named 'patchify'`** → `pip install patchify`, then
+re-pin `pip install "numpy==2.4.6"`.
+
+**`No module named 'numpy.lib.array_utils'` / cvxpy fails to import** → numpy got
+downgraded to <2 (usually by installing patchify). Fix: `pip install "numpy==2.4.6"`.
+
 **`conda` not found** → Open the "Miniforge Prompt"/"Anaconda Prompt", or add conda to PATH.
 
 ---
@@ -226,7 +283,8 @@ conda create -n portpy python=3.11 -y
 conda activate portpy
 
 # 2. install
-pip install "portpy[mosek,data]" jupyter ipykernel
+pip install "portpy[mosek,data]" jupyter ipykernel patchify
+pip install "numpy==2.4.6"      # undo patchify's numpy downgrade
 python -m ipykernel install --user --name portpy --display-name "Python 3.11 (portpy)"
 
 # 3. code: both repos in the same parent folder
@@ -235,12 +293,17 @@ git clone https://github.com/mpopat7/algoverse-portpy-beam-optimization.git   # 
 git clone https://github.com/PortPy-Project/PortPy.git                        # the library
 cd PortPy && git checkout -b research-v1.1.4 v1.1.4 && cd ..
 
-# 4. MOSEK license -> ~/mosek/mosek.lic  (request at mosek.com, .edu email)
-
-# 5. data (single-connection, resumable)
+# 4. patch PortPy's down-sampler + MOSEK license
 cd algoverse-portpy-beam-optimization
-python scripts/download_patient_data.py Lung_Patient_3
+python scripts/patch_portpy_downsampler.py
+# MOSEK license -> ~/mosek/mosek.lic  (request at mosek.com, .edu email)
 
-# 6. open PortPy in VS Code, pick the "Python 3.11 (portpy)" kernel, Run All on
-#    examples/1_basic_tutorial.ipynb  (cell 9 ~= Optimal value 53.2)
+# 5. data (single-connection, resumable). --beam-mode all needed for the GA's beam pool
+python scripts/download_patient_data.py Lung_Patient_3 --beam-mode all
+
+# 6. run the GA
+python ga_bao.py --patient Lung_Patient_3 --k 7 --pop 20 --gens 40
+
+# (to learn PortPy first: open PortPy in VS Code, pick the "Python 3.11 (portpy)" kernel,
+#  Run All on examples/1_basic_tutorial.ipynb  -> cell 9 ~= Optimal value 53.2)
 ```
