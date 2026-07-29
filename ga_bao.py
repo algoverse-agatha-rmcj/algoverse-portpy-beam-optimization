@@ -255,6 +255,16 @@ def main():
                     help="Cache file for crash-safe resume (default: <out>.cache.json).")
     args = ap.parse_args()
 
+    # The planner (expert) beams must be reachable from the pool, otherwise a
+    # GA-vs-expert comparison is rigged: on Lung_Patient_2 the expert uses beam 37
+    # (185 deg), which a 15-deg grid like range(0,72,3) cannot represent.
+    planner = json.loads(
+        (Path(args.data_dir) / args.patient / "PlannerBeams.json").read_text())["IDs"]
+    missing = sorted(set(planner) - set(args.pool))
+    if missing:
+        args.pool = sorted(set(args.pool) | set(missing))
+        print(f"[pool] added expert beams {missing}; pool is now {len(args.pool)} beams")
+
     ckpt = args.checkpoint or (args.out + ".cache.json")
 
     problem = BAOProblem(args.data_dir, args.patient, args.pool,
