@@ -1,6 +1,6 @@
 # Lung_Patient_2 — GA vs. clinician, first end-to-end comparison
 
-Milen, 2026-07-29. Branch `milen/patient2-expert-pool`. All runs on a Mac Studio (M4 Max, 36 GB).
+Milen, 2026-07-29. Branch `milen/patient2-expert-pool`. All runs on a 36 GB machine.
 
 ## Headline
 
@@ -113,7 +113,7 @@ has no clinical meaning, and it is quadratic, so a 3.8% objective change is roug
 ## Reproduce
 
 ```bash
-# env (no conda needed; Homebrew python3.11 + venv)
+# env (no conda needed; python3.11 + venv)
 python3.11 -m venv ../portpy-venv
 ../portpy-venv/bin/pip install "portpy[mosek,data]" patchify && ../portpy-venv/bin/pip install numpy==2.4.6
 ../portpy-venv/bin/python scripts/patch_portpy_downsampler.py   # required, PortPy crashes without it
