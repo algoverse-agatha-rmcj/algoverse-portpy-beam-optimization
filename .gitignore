@@ -1,0 +1,4 @@
+__pycache__/
+*.pyc
+ga_results*.json
+.ipynb_checkpoints/
