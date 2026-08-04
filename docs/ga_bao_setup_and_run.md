@@ -44,7 +44,7 @@ pip install "numpy==2.4.6"
 Put both repos in the SAME parent folder (example uses Downloads):
 ```bash
 cd C:\Users\jpwun\Downloads
-git clone https://github.com/mpopat7/algoverse-portpy-beam-optimization.git
+git clone https://github.com/algoverse-agatha-rmcj/algoverse-portpy-beam-optimization.git
 git clone https://github.com/PortPy-Project/PortPy.git
 cd PortPy
 git checkout -b research-v1.1.4 v1.1.4

@@ -116,7 +116,7 @@ Pick a parent folder (this guide uses `Downloads`) and put **both** repos in it.
 If not:
 ```bash
 cd ~/Downloads
-git clone https://github.com/mpopat7/algoverse-portpy-beam-optimization.git
+git clone https://github.com/algoverse-agatha-rmcj/algoverse-portpy-beam-optimization.git
 ```
 
 **b) PortPy (the library) — clone upstream as a sibling, and pin it to `v1.1.4`:**
@@ -289,7 +289,7 @@ python -m ipykernel install --user --name portpy --display-name "Python 3.11 (po
 
 # 3. code: both repos in the same parent folder
 cd ~/Downloads
-git clone https://github.com/mpopat7/algoverse-portpy-beam-optimization.git   # our repo
+git clone https://github.com/algoverse-agatha-rmcj/algoverse-portpy-beam-optimization.git   # our repo
 git clone https://github.com/PortPy-Project/PortPy.git                        # the library
 cd PortPy && git checkout -b research-v1.1.4 v1.1.4 && cd ..
 
