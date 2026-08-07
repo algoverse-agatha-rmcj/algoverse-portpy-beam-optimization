@@ -105,6 +105,7 @@ def main():
         ptv_d95 = float(pp.Evaluation.get_dose(sol, struct="PTV", volume_per=95,
                                                dose_1d=dose_1d))
         results[name] = {"beams": beams, "objective": obj, "A_shape": list(shape),
+                         "downsampled": bool(args.downsample),
                          "PTV_D95_Gy": ptv_d95, "criteria": rows,
                          "solve_time_s": round(time.time() - t0, 1)}
         print(f"objective {obj:.4f} | PTV D95 {ptv_d95:.2f} Gy | "

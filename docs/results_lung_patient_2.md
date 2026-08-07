@@ -110,6 +110,23 @@ has no clinical meaning, and it is quadratic, so a 3.8% objective change is roug
 3. **Patient data is ~33 GB each** at `--beam-mode all`, not "multi-GB". Downloading many
    patients is a storage decision. The dataset has 331 patients (201 lung, 129 prostate).
 
+## The figure
+
+`dvh_lung_patient_2.pdf`, three pages:
+
+1. **Overlay** — clinician solid vs. GA B dashed, four structures on one axes.
+2. **Per structure** — one panel each, all three plans, and *that structure's protocol
+   metrics printed in the panel*. Bold is the best of the three; grey means the plans
+   agree within 0.01, so the row carries no signal.
+3. **Clinical criteria table** — all 16 Lung_2Gy_30Fx criteria, the table above in the
+   reference paper's format, plus PTV D95, objective, solve time and beam angles.
+
+Pages 2 and 3 read `clinical_compare_full.json` rather than recomputing anything, so the
+figure and this document cannot drift apart. `plot_dvh.py` refuses to draw if that file's
+beam sets or resolution disagree with the cached curves — scoring GA angles down-sampled
+against a full-resolution clinician baseline is exactly the apples-to-apples failure
+Jordan flagged, and it is now a hard error rather than a thing to remember.
+
 ## Reproduce
 
 ```bash
@@ -125,13 +142,14 @@ python3.11 -m venv ../portpy-venv
     --out ga_results_lung2.json
 ../portpy-venv/bin/python scripts/score_beam_set.py --patient Lung_Patient_2   # expert baseline
 ../portpy-venv/bin/python scripts/clinical_compare.py --out clinical_compare_full.json
+../portpy-venv/bin/python scripts/plot_dvh.py                 # solve + cache + 3-page PDF
+../portpy-venv/bin/python scripts/plot_dvh.py --from-cache    # re-plot only, free
 ```
 
 ## Open
 
 - One patient, one seed, no error bars. Needs repeat seeds before any claim is firm.
 - Run B had not converged at 40 generations.
-- DVH plot (GA curve vs expert curve) not yet built — the remaining Slack action item.
 - Lung_Patient_3 has no expert baseline; nobody has scored `[0, 6, 12, 18, 24, 30, 35]`,
   so Jordan's 82.817 has nothing to measure against. Needs the Patient 3 download.
 - Run A converged at gen 24 and burned 268 solves (~30 min) for nothing. Early stopping
