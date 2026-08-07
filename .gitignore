@@ -2,3 +2,7 @@ __pycache__/
 *.pyc
 ga_results*.json
 .ipynb_checkpoints/
+
+# plot_dvh.py --cache: full-resolution DVH curve points, rebuilt from the dose data.
+# The beams/objectives they illustrate are already in clinical_compare_*.json.
+*.npz
