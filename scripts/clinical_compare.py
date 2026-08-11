@@ -9,8 +9,8 @@ Each set is solved with a pool equal to the set itself: at full resolution there
 pool-dependent discretization, so this is equivalent to deactivating unused beams and
 is far cheaper in memory.
 
-    python scripts/clinical_compare.py
-    python scripts/clinical_compare.py --downsample     # sanity check, much faster
+    python scripts/clinical_compare.py --patient Lung_Patient_3
+    python scripts/clinical_compare.py --patient Lung_Patient_3 --downsample
 """
 import argparse
 import json
@@ -81,17 +81,49 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--data-dir", default="../data")
     ap.add_argument("--patient", default="Lung_Patient_2")
+    ap.add_argument(
+        "--ga-result",
+        default=None,
+        help="GA result JSON (default: the patient's down-sampled seed-0 result)",
+    )
     ap.add_argument("--downsample", action="store_true",
                     help="down-sample (fast sanity check); default is full resolution")
-    ap.add_argument("--out", default="clinical_compare.json")
+    ap.add_argument("--out", default=None)
     args = ap.parse_args()
+
+    if args.ga_result is None:
+        args.ga_result = str(
+            Path("results") / args.patient / "ga_runs"
+            / f"{args.patient}_ga_downsampled_seed_0.json"
+        )
+
+    ga_result_path = Path(args.ga_result)
+    ga_result = json.loads(ga_result_path.read_text())
+    if ga_result.get("patient") != args.patient:
+        raise SystemExit(
+            f"{ga_result_path}: patient is {ga_result.get('patient')!r}, "
+            f"expected {args.patient!r}"
+        )
+    ga_beams = [int(b) for b in ga_result["best_angles"]]
+    if 36 in ga_beams:
+        raise SystemExit(
+            f"{ga_result_path}: GA winner contains beam 36 (180 degrees); "
+            "use the no-180 run"
+        )
+
+    if args.out is None:
+        resolution = "downsampled" if args.downsample else "full_resolution"
+        args.out = str(
+            Path("results") / args.patient / "clinical_comparison"
+            / f"{args.patient}_clinical_metrics_{resolution}.json"
+        )
+    Path(args.out).parent.mkdir(parents=True, exist_ok=True)
 
     planner = json.loads(
         (Path(args.data_dir) / args.patient / "PlannerBeams.json").read_text())["IDs"]
     plans = {
         "expert": planner,
-        "GA_A_with180": [6, 33, 36, 39, 51, 57, 66],
-        "GA_B_no180": [9, 33, 39, 51, 57, 60, 66],
+        "GA": ga_beams,
     }
 
     results = {}
@@ -108,6 +140,8 @@ def main():
                          "downsampled": bool(args.downsample),
                          "PTV_D95_Gy": ptv_d95, "criteria": rows,
                          "solve_time_s": round(time.time() - t0, 1)}
+        if name == "GA":
+            results[name]["source_ga_result"] = str(ga_result_path)
         print(f"objective {obj:.4f} | PTV D95 {ptv_d95:.2f} Gy | "
               f"A {shape} | {time.time()-t0:.0f}s", flush=True)
         Path(args.out).write_text(json.dumps(results, indent=2))

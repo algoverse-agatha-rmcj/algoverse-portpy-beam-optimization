@@ -2,6 +2,34 @@
 
 Milen, 2026-07-29. Branch `milen/patient2-expert-pool`. All runs on a 36 GB machine.
 
+## Folder contents
+
+```text
+Lung_Patient_2/
+├── ga_runs/
+│   ├── Lung_Patient_2_ga_downsampled_seed_0.json
+│   │                                                  # primary, 180° excluded
+│   └── Lung_Patient_2_ga_downsampled_seed_0_with_180_legacy.json
+│                                                      # historical comparison only
+├── clinical_comparison/
+│   ├── Lung_Patient_2_clinical_metrics_downsampled.json
+│   │                                                  # search-resolution check
+│   └── Lung_Patient_2_clinical_metrics_full_resolution.json
+│                                                      # clinical source of truth
+├── figures/
+│   └── Lung_Patient_2_DVH_clinical_metrics.pdf
+│                                                      # curves + metrics + criteria table
+├── cache/                                           # derived/resumable; ignored by Git
+└── README.md
+```
+
+For the current result, start with
+`ga_runs/Lung_Patient_2_ga_downsampled_seed_0.json`, then use
+`clinical_comparison/Lung_Patient_2_clinical_metrics_full_resolution.json` and
+`figures/Lung_Patient_2_DVH_clinical_metrics.pdf` for the clinician comparison. The legacy 180° run is
+retained only because the figure documents why that apparently stronger result is not
+clinically defensible.
+
 ## Headline
 
 On Lung_Patient_2 the GA finds beam angles that **reduce heart V30Gy by 32% and lung
@@ -112,7 +140,7 @@ has no clinical meaning, and it is quadratic, so a 3.8% objective change is roug
 
 ## The figure
 
-`dvh_lung_patient_2.pdf`, three pages:
+`figures/Lung_Patient_2_DVH_clinical_metrics.pdf`, three pages:
 
 1. **Overlay** — clinician solid vs. GA B dashed, four structures on one axes.
 2. **Per structure** — one panel each, all three plans, and *that structure's protocol
@@ -121,7 +149,9 @@ has no clinical meaning, and it is quadratic, so a 3.8% objective change is roug
 3. **Clinical criteria table** — all 16 Lung_2Gy_30Fx criteria, the table above in the
    reference paper's format, plus PTV D95, objective, solve time and beam angles.
 
-Pages 2 and 3 read `clinical_compare_full.json` rather than recomputing anything, so the
+Pages 2 and 3 read
+`clinical_comparison/Lung_Patient_2_clinical_metrics_full_resolution.json` rather than recomputing
+anything, so the
 figure and this document cannot drift apart. `plot_dvh.py` refuses to draw if that file's
 beam sets or resolution disagree with the cached curves — scoring GA angles down-sampled
 against a full-resolution clinician baseline is exactly the apples-to-apples failure
@@ -138,10 +168,9 @@ python3.11 -m venv ../portpy-venv
 
 ../portpy-venv/bin/python scripts/download_patient_data.py Lung_Patient_2 --beam-mode all
 
-../portpy-venv/bin/python ga_bao.py --patient Lung_Patient_2 --k 7 --pop 20 --gens 40 \
-    --out ga_results_lung2.json
+../portpy-venv/bin/python ga_bao.py --patient Lung_Patient_2 --k 7 --pop 20 --gens 40
 ../portpy-venv/bin/python scripts/score_beam_set.py --patient Lung_Patient_2   # expert baseline
-../portpy-venv/bin/python scripts/clinical_compare.py --out clinical_compare_full.json
+../portpy-venv/bin/python scripts/clinical_compare.py
 ../portpy-venv/bin/python scripts/plot_dvh.py                 # solve + cache + 3-page PDF
 ../portpy-venv/bin/python scripts/plot_dvh.py --from-cache    # re-plot only, free
 ```

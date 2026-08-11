@@ -1,12 +1,12 @@
 #!/usr/bin/env python
-"""Dose-volume histograms for the clinician plan vs. the two GA plans, as a PDF.
+"""Dose-volume histograms for clinician and GA plans, as a PDF.
 
 Solves each beam set at FULL resolution (same treatment as scripts/clinical_compare.py,
 so the curves and that script's criteria table describe the same plans), extracts a DVH
 curve per structure, and writes a three-page PDF:
 
-    page 1  conventional overlay - clinician solid vs. GA B dashed, all structures
-    page 2  one panel per structure, all three plans, each annotated with that
+    page 1  conventional overlay - clinician solid vs. current GA dashed
+    page 2  one panel per structure, all plans, each annotated with that
             structure's protocol metrics
     page 3  the full clinical-criteria table, all 16 Lung_2Gy_30Fx criteria
 
@@ -51,19 +51,18 @@ COLORS = {"PTV": "#2a78d6", "HEART": "#eb6834", "LUNGS_NOT_GTV": "#1baf7a",
 NICE = {"PTV": "PTV (target)", "HEART": "Heart", "LUNGS_NOT_GTV": "Lungs (minus GTV)",
         "ESOPHAGUS": "Esophagus", "CORD": "Spinal cord"}
 
-PLANS = ["expert", "GA_A_with180", "GA_B_no180"]
-PLAN_LABEL = {"expert": "Clinician", "GA_A_with180": "GA run A (180° allowed)",
-              "GA_B_no180": "GA run B (180° removed)"}
-PLAN_STYLE = {"expert": "solid", "GA_A_with180": "dashdot", "GA_B_no180": "dashed"}
+PLANS = []
+PLAN_LABEL = {}
+PLAN_STYLE = {}
 
 INK, MUTED, GRID = "#0d1216", "#5a656d", "#dfe4e7"
 OVER_LIMIT, MISSED_GOAL = "#c0392b", "#a86711"
 # Short column heads for the in-panel metric blocks, where the full plan labels do not fit.
-PLAN_ABBR = {"expert": "Clin", "GA_A_with180": "GA A", "GA_B_no180": "GA B"}
+PLAN_ABBR = {}
 
 # Two criteria differing by less than this are the same number for reporting purposes:
 # used both to fold the protocol's duplicate rows together and to grey out rows where
-# all three plans land in the same place.
+# all plans land in the same place.
 TIE_TOL = 0.01
 
 
@@ -93,12 +92,7 @@ def solve_set(data_dir, patient, beams, downsample):
     return plan, sol, dose_1d, float(prob.value)
 
 
-def collect(data_dir, patient, downsample, cache_path):
-    planner = json.loads((Path(data_dir) / patient / "PlannerBeams.json").read_text())["IDs"]
-    beam_sets = {"expert": planner,
-                 "GA_A_with180": [6, 33, 36, 39, 51, 57, 66],
-                 "GA_B_no180": [9, 33, 39, 51, 57, 60, 66]}
-
+def collect(data_dir, patient, downsample, cache_path, beam_sets):
     out = {}
     for name in PLANS:
         beams = beam_sets[name]
@@ -123,15 +117,42 @@ def _tied(a, b):
     return a is not None and b is not None and abs(a - b) <= TIE_TOL
 
 
+def configure_plans(raw):
+    """Configure labels and line styles from one comparison JSON."""
+    global PLANS, PLAN_LABEL, PLAN_STYLE, PLAN_ABBR
+
+    PLANS = list(raw)
+    if not PLANS or PLANS[0] != "expert" or len(PLANS) < 2:
+        raise SystemExit("comparison JSON must start with 'expert' and include a GA plan")
+
+    known = {
+        "expert": ("Clinician", "Clin", "solid"),
+        "GA": ("GA (180° excluded)", "GA", "dashed"),
+        "GA_A_with180": ("GA run A (180° allowed)", "GA A", "dashdot"),
+        "GA_B_no180": ("GA run B (180° removed)", "GA B", "dashed"),
+    }
+    fallback_styles = ("dashed", "dashdot", "dotted")
+    PLAN_LABEL, PLAN_ABBR, PLAN_STYLE = {}, {}, {}
+    for i, name in enumerate(PLANS):
+        label, abbr, style = known.get(
+            name,
+            (name.replace("_", " "), name[:7], fallback_styles[(i - 1) % 3]),
+        )
+        PLAN_LABEL[name] = label
+        PLAN_ABBR[name] = abbr
+        PLAN_STYLE[name] = style
+
+
 def load_criteria(path):
     """Read clinical_compare.py's JSON into one row per distinct measurement.
 
     The protocol lists some metrics twice — HEART V30Gy appears once carrying the 50%
     limit and once carrying the 48% goal — which would print as two identical table
-    rows. Rows that share a label and agree on all three plans are folded into one
+    rows. Rows that share a label and agree on all plans are folded into one
     carrying both thresholds.
     """
     raw = json.loads(Path(path).read_text())
+    configure_plans(raw)
     missing = [p for p in PLANS if p not in raw]
     if missing:
         raise SystemExit(f"{path}: no entry for {missing}. Re-run scripts/clinical_compare.py.")
@@ -195,11 +216,11 @@ def struct_rows(criteria, struct):
 
 
 def best_plans(row):
-    """Plans tied for the lowest value, or an empty set when all three are tied.
+    """Plans tied for the lowest value, or an empty set when all plans are tied.
 
     Every Lung_2Gy_30Fx criterion is a ceiling (max dose, mean dose, or volume above a
     dose), so lower is better without exception. Structures that abut the target — heart
-    max, lung max — sit at 66 Gy for all three plans; those rows carry no signal and are
+    max, lung max — can sit at 66 Gy for all plans; those rows carry no signal and are
     deliberately left unmarked. Marking every plan within TIE_TOL of the winner rather
     than the single argmin keeps two plans printing 66.00 from being typeset as if one
     beat the other.
@@ -236,8 +257,9 @@ def style_axes(ax, xmax):
 
 def page_overlay(pdf, C, xmax, patient, downsampled):
     fig, ax = plt.subplots(figsize=(10.5, 6.2))
+    comparison_plan = PLANS[-1]
     for s in OVERLAY_STRUCTS:
-        for name in ("expert", "GA_B_no180"):
+        for name in ("expert", comparison_plan):
             ax.plot(C[f"{name}|{s}|x"], C[f"{name}|{s}|y"],
                     color=COLORS[s], linestyle=PLAN_STYLE[name],
                     linewidth=1.9, solid_capstyle="round")
@@ -248,7 +270,7 @@ def page_overlay(pdf, C, xmax, patient, downsampled):
     struct_keys = [Line2D([], [], color=COLORS[s], lw=2.2, label=NICE[s])
                    for s in OVERLAY_STRUCTS]
     plan_keys = [Line2D([], [], color=MUTED, lw=2.2, linestyle=PLAN_STYLE[n],
-                        label=PLAN_LABEL[n]) for n in ("expert", "GA_B_no180")]
+                        label=PLAN_LABEL[n]) for n in ("expert", comparison_plan)]
     # both legends outside the axes: inside, they collide with the PTV shoulder
     first = ax.legend(handles=struct_keys, loc="upper left", bbox_to_anchor=(1.015, 1.0),
                       frameon=False, fontsize=9, labelcolor=INK, title="Structure")
@@ -262,12 +284,12 @@ def page_overlay(pdf, C, xmax, patient, downsampled):
 
     fig.suptitle(f"Dose-volume histogram — {patient}", x=0.125, y=0.965,
                  ha="left", fontsize=14, fontweight="bold", color=INK)
-    ax.set_title("Clinician plan vs. GA run B. A curve further left and lower means less "
-                 "dose to that structure.",
+    ax.set_title(f"Clinician plan vs. {PLAN_LABEL[comparison_plan]}. A curve further left "
+                 "and lower means less dose to that structure.",
                  loc="left", fontsize=9, color=MUTED, pad=10)
     note = ("Curves further left are better for organs; the PTV curve should stay high, then "
-            "drop sharply.\nBoth plans deliver the same target coverage — the GA trades cord "
-            "dose for heart sparing. Esophagus is on page 2.")
+            "drop sharply.\nTarget curves should overlap; organ curves show the tradeoffs. "
+            "Esophagus is on page 2.")
     if downsampled:
         note = "DOWN-SAMPLED — illustrative shape only, not clinically valid.\n" + note
     fig.text(0.075, 0.015, note, fontsize=8, color=MUTED, va="bottom")
@@ -277,7 +299,7 @@ def page_overlay(pdf, C, xmax, patient, downsampled):
 
 
 def annotate_panel(ax, criteria, raw, struct):
-    """Print this structure's protocol metrics for all three plans inside its panel.
+    """Print this structure's protocol metrics for all plans inside its panel.
 
     A DVH answers "which plan is lower" but not "by how much, and against what limit";
     the numbers are what a planner actually reads. Placement dodges the curves: an organ
@@ -294,7 +316,8 @@ def annotate_panel(ax, criteria, raw, struct):
         return
 
     x0, y_top = (0.055, 0.40) if struct == "PTV" else (0.335, 0.95)
-    col_x = [x0 + 0.215, x0 + 0.435, x0 + 0.645]
+    first_col = x0 + (0.35 if len(PLANS) == 2 else 0.215)
+    col_x = np.linspace(first_col, 0.98, len(PLANS))
     step = 0.078
 
     for x, name in zip(col_x, PLANS):
@@ -347,9 +370,9 @@ def page_panels(pdf, C, xmax, patient, downsampled, criteria, raw):
 
     fig.suptitle(f"DVH by structure — {patient}", x=0.06, y=0.97,
                  ha="left", fontsize=14, fontweight="bold", color=INK)
-    note = ("Same curves, one structure per panel, all three plans, each annotated with "
-            "that structure's protocol metrics.\nBold = best of the three; grey = the "
-            "three plans are within 0.01 of each other, so the row carries no signal. "
+    note = ("Same curves, one structure per panel, all plans, each annotated with "
+            "that structure's protocol metrics.\nBold = best plan; grey = all plans "
+            "are within 0.01 of each other, so the row carries no signal. "
             "Amber misses a goal, red exceeds a limit.")
     if downsampled:
         note = "DOWN-SAMPLED — illustrative shape only, not clinically valid. " + note
@@ -360,19 +383,22 @@ def page_panels(pdf, C, xmax, patient, downsampled, criteria, raw):
 
 
 def page_table(pdf, criteria, raw, patient, downsampled, criteria_path):
-    """The reference paper's table: every protocol criterion, all three plans."""
+    """The reference paper's table: every protocol criterion, all plans."""
     fig = plt.figure(figsize=(11, 8.5))
 
     label_x = 0.055
     thresh_x = (0.435, 0.505)                       # limit, goal (right-aligned)
-    plan_x = (0.665, 0.795, 0.925)                  # clinician, GA A, GA B
+    plan_x = np.linspace(0.74 if len(PLANS) == 2 else 0.665, 0.925, len(PLANS))
 
     y, step = 0.855, 0.0345
 
     # Two-line plan headings: the full labels are far wider than a 0.13 column, so the
     # qualifier drops to its own line rather than colliding with the neighbour.
     HEAD = {"expert": ("Clinician", ""), "GA_A_with180": ("GA run A", "180° allowed"),
-            "GA_B_no180": ("GA run B", "180° removed")}
+            "GA_B_no180": ("GA run B", "180° removed"),
+            "GA": ("GA", "180° excluded")}
+    for name in PLANS:
+        HEAD.setdefault(name, (PLAN_LABEL[name], ""))
     fig.text(label_x, y, "Criterion", fontsize=8.5, color=MUTED, va="bottom")
     for x, head in zip(thresh_x, ("Limit", "Goal")):
         fig.text(x, y, head, fontsize=8.5, color=MUTED, va="bottom", ha="right")
@@ -423,7 +449,7 @@ def page_table(pdf, criteria, raw, patient, downsampled, criteria_path):
     fig.suptitle(f"Clinical criteria — {patient}", x=label_x, y=0.955,
                  ha="left", fontsize=14, fontweight="bold", color=INK)
     sub = ("Lung_2Gy_30Fx protocol. Every criterion is a ceiling, so lower is better; "
-           "bold marks the best of the three plans.")
+           "bold marks the best plan.")
     fig.text(label_x, 0.912, sub, fontsize=9, color=MUTED, va="top")
 
     # Beam angles as a footnote block, not a table row: seven gantry angles are wider
@@ -438,13 +464,12 @@ def page_table(pdf, criteria, raw, patient, downsampled, criteria_path):
              linespacing=1.65, family="monospace")
 
     prose = (
-        "Grey rows: the three plans agree within 0.01 — heart, lung and LUNGS_NOT_GTV max "
-        "sit at 66 Gy for every plan because those structures abut the target, which is "
-        "target dose leaking in rather than a property of the beam angles. "
-        "Amber meets the limit but misses the goal; red exceeds the limit.\n"
-        f"Source: {criteria_path}, "
-        f"{'DOWN-SAMPLED — per-organ metrics NOT clinically valid' if downsampled else 'full resolution'}"
-        " — the same solve the curves come from, so figure and table cannot drift apart."
+        "Grey rows: all plans agree within 0.01 — heart, lung and LUNGS_NOT_GTV max "
+        "sit at 66 Gy because those structures abut the target. "
+        "Amber misses the goal; red exceeds the limit.\n"
+        f"Source: {Path(criteria_path).name}, "
+        f"{'DOWN-SAMPLED — per-organ metrics NOT clinically valid' if downsampled else 'full resolution'}. "
+        "The curves and table come from the same solve."
     )
     wrapped = "\n".join(textwrap.fill(line, width=148) for line in prose.split("\n"))
     fig.text(label_x, 0.077, wrapped, fontsize=7.5, color=MUTED, va="top",
@@ -460,20 +485,40 @@ def main():
     ap.add_argument("--downsample", action="store_true",
                     help="fast sanity check; per-organ metrics are NOT preserved")
     ap.add_argument("--from-cache", action="store_true", help="re-plot without solving")
-    ap.add_argument("--cache", default="dvh_curves.npz")
-    ap.add_argument("--criteria", default="clinical_compare_full.json",
+    ap.add_argument("--cache", default=None)
+    ap.add_argument("--criteria",
+                    default=None,
                     help="scripts/clinical_compare.py output; supplies the numbers on "
                          "pages 2 and 3, and must describe the same solve as the curves")
-    ap.add_argument("--out", default="dvh_lung_patient_2.pdf")
+    ap.add_argument("--out", default=None)
     args = ap.parse_args()
+
+    patient_results = Path("results") / args.patient
+    resolution = "downsampled" if args.downsample else "full_resolution"
+    if args.cache is None:
+        args.cache = str(patient_results / "cache" / f"{args.patient}_DVH_curves.npz")
+    if args.criteria is None:
+        args.criteria = str(
+            patient_results / "clinical_comparison"
+            / f"{args.patient}_clinical_metrics_{resolution}.json"
+        )
+    if args.out is None:
+        args.out = str(
+            patient_results / "figures" / f"{args.patient}_DVH_clinical_metrics.pdf"
+        )
+
+    Path(args.cache).parent.mkdir(parents=True, exist_ok=True)
+    Path(args.out).parent.mkdir(parents=True, exist_ok=True)
+
+    raw, criteria = load_criteria(args.criteria)
+    beam_sets = {name: raw[name]["beams"] for name in PLANS}
 
     if args.from_cache:
         C = dict(np.load(args.cache))
         print(f"loaded cached curves <- {args.cache}")
     else:
-        C = collect(args.data_dir, args.patient, args.downsample, args.cache)
+        C = collect(args.data_dir, args.patient, args.downsample, args.cache, beam_sets)
 
-    raw, criteria = load_criteria(args.criteria)
     table_ds = check_provenance(C, raw, args.criteria)
     if table_ds is None:
         print(f"note: {args.criteria} predates the 'downsampled' flag; resolution "
