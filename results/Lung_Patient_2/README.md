@@ -1,6 +1,6 @@
 # Lung_Patient_2 — GA vs. clinician, first end-to-end comparison
 
-Milen, 2026-07-29. Branch `milen/patient2-expert-pool`. All runs on a 36 GB machine.
+Milen, 2026-07-29. Branch `milen/patient2-expert-pool`. All runs on a Mac.
 
 ## Folder contents
 
@@ -94,7 +94,7 @@ both flipped direction between the down-sampled and full-resolution tables. Sear
 down-sampled; **evaluate at full resolution, always.**
 
 Full resolution is also much cheaper than assumed: **42 s/solve**, matrix 386,585 × 6,004,
-comfortable in 36 GB. A complete 720-solve GA at native resolution is ~8 h — an overnight
+and it fits comfortably in memory on a Mac. A complete 720-solve GA at native resolution is ~8 h — an overnight
 job. The team may not need down-sampling at all for single-patient work.
 
 ## Clinical criteria — full resolution (the numbers that matter)
