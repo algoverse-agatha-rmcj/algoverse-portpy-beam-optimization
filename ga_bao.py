@@ -7,8 +7,9 @@ A genetic algorithm that searches for a good set of IMRT beam angles. PortPy is
 treated as a black-box "fitness function": we hand it a set of beam angles, it
 runs the (convex) fluence optimization with MOSEK and returns an objective
 value; lower = better. The GA evolves a population of beam-angle sets toward
-lower objective values, and we compare the winner against PortPy's MILP global
-optimum.
+lower objective values, then re-solves the winner and clinician-selected angles
+at the same resolution for comparison. PortPy 1.1.4 does not ship an exact MILP
+beam-angle optimizer, so the project does not currently claim a global optimum.
 
 KEY DESIGN: "down-sample once"
 ------------------------------
@@ -56,6 +57,8 @@ from pathlib import Path
 
 import numpy as np
 import portpy.photon as pp
+
+from scripts.json_io import atomic_write_json, read_json
 
 FAILED_SOLVE_SCORE = 1e12  # penalty recorded when a solve fails/infeasible (JSON-safe, sorts worst)
 
@@ -146,13 +149,17 @@ class BAOProblem:
     def save_cache(self, path):
         """Persist the solve cache so a crashed/interrupted run can resume for free."""
         data = [{"beams": sorted(bs), "score": sc} for bs, sc in self._cache.items()]
-        Path(path).write_text(json.dumps(data))
+        atomic_write_json(path, data)
 
     def load_cache(self, path):
         """Reload a previously saved cache (same seed => the GA replays instantly)."""
         p = Path(path)
         if p.exists():
-            for item in json.loads(p.read_text()):
+            cached = read_json(p)
+            if not isinstance(cached, list):
+                print(f"[checkpoint] ignored incomplete cache {p.name}")
+                return
+            for item in cached:
                 self._cache[frozenset(item["beams"])] = item["score"]
             print(f"[checkpoint] loaded {len(self._cache)} cached solves from {p.name}")
 
@@ -305,7 +312,7 @@ def main():
     t0 = time.time()
 
     def write_results(best, best_fit, history):
-        Path(args.out).write_text(json.dumps({
+        atomic_write_json(args.out, {
             "patient": args.patient, "pool": args.pool, "k": args.k,
             "pop": args.pop, "gens": args.gens, "mutation_rate": args.mutation_rate,
             "seed": args.seed,
@@ -313,7 +320,7 @@ def main():
             "unique_solves": problem.num_solves,
             "wall_time_s": round(time.time() - t0, 1),
             "history": history,
-        }, indent=2))
+        })
 
     best, best_fit, history = run_ga(problem, args.k, args.pop, args.gens,
                                      args.mutation_rate, args.seed,

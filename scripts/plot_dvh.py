@@ -19,9 +19,9 @@ must come from the same treatment, or the comparison is not apples-to-apples, so
 Solving is the expensive part (~40 s per plan at full resolution, plus the influence
 matrix load), so the curves are cached to an .npz. Re-plotting is free:
 
-    python scripts/plot_dvh.py                      # solve, cache, plot
-    python scripts/plot_dvh.py --from-cache         # re-plot only
-    python scripts/plot_dvh.py --downsample         # fast sanity check, NOT clinical
+    python scripts/plot_dvh.py --patient Lung_Patient_3
+    python scripts/plot_dvh.py --patient Lung_Patient_3 --from-cache
+    python scripts/plot_dvh.py --patient Lung_Patient_3 --downsample
 """
 import argparse
 import json
@@ -37,6 +37,11 @@ from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib.lines import Line2D
 
 import portpy.photon as pp
+
+if __package__:
+    from .metric_ranking import select_best_plans
+else:
+    from metric_ranking import select_best_plans
 
 PROTOCOL = "Lung_2Gy_30Fx"
 
@@ -121,9 +126,9 @@ def configure_plans(raw):
     """Configure labels and line styles from one comparison JSON."""
     global PLANS, PLAN_LABEL, PLAN_STYLE, PLAN_ABBR
 
-    PLANS = list(raw)
-    if not PLANS or PLANS[0] != "expert" or len(PLANS) < 2:
-        raise SystemExit("comparison JSON must start with 'expert' and include a GA plan")
+    if "expert" not in raw or len(raw) < 2:
+        raise SystemExit("comparison JSON must include 'expert' and at least one GA plan")
+    PLANS = ["expert", *(name for name in raw if name != "expert")]
 
     known = {
         "expert": ("Clinician", "Clin", "solid"),
@@ -216,20 +221,8 @@ def struct_rows(criteria, struct):
 
 
 def best_plans(row):
-    """Plans tied for the lowest value, or an empty set when all plans are tied.
-
-    Every Lung_2Gy_30Fx criterion is a ceiling (max dose, mean dose, or volume above a
-    dose), so lower is better without exception. Structures that abut the target — heart
-    max, lung max — can sit at 66 Gy for all plans; those rows carry no signal and are
-    deliberately left unmarked. Marking every plan within TIE_TOL of the winner rather
-    than the single argmin keeps two plans printing 66.00 from being typeset as if one
-    beat the other.
-    """
-    vals = [v for v in row["values"].values() if v is not None]
-    if len(vals) < len(PLANS) or max(vals) - min(vals) <= TIE_TOL:
-        return set()
-    lo = min(vals)
-    return {p for p, v in row["values"].items() if v - lo <= TIE_TOL}
+    """Return the clinically preferable plans, or no marker when all plans tie."""
+    return select_best_plans(row, PLANS, TIE_TOL)
 
 
 def value_color(row, plan):
@@ -371,8 +364,9 @@ def page_panels(pdf, C, xmax, patient, downsampled, criteria, raw):
     fig.suptitle(f"DVH by structure — {patient}", x=0.06, y=0.97,
                  ha="left", fontsize=14, fontweight="bold", color=INK)
     note = ("Same curves, one structure per panel, all plans, each annotated with "
-            "that structure's protocol metrics.\nBold = best plan; grey = all plans "
-            "are within 0.01 of each other, so the row carries no signal. "
+            "that structure's protocol metrics.\nBold = clinically preferable: organs "
+            "favor lower dose; PTV favors the value closest to goal within the limit. "
+            "Grey = all plans are within 0.01 of each other. "
             "Amber misses a goal, red exceeds a limit.")
     if downsampled:
         note = "DOWN-SAMPLED — illustrative shape only, not clinically valid. " + note
@@ -448,8 +442,8 @@ def page_table(pdf, criteria, raw, patient, downsampled, criteria_path):
 
     fig.suptitle(f"Clinical criteria — {patient}", x=label_x, y=0.955,
                  ha="left", fontsize=14, fontweight="bold", color=INK)
-    sub = ("Lung_2Gy_30Fx protocol. Every criterion is a ceiling, so lower is better; "
-           "bold marks the best plan.")
+    sub = ("Organs: lower is better. PTV: closest to goal without exceeding the limit. "
+           "Bold marks the best plan.")
     fig.text(label_x, 0.912, sub, fontsize=9, color=MUTED, va="top")
 
     # Beam angles as a footnote block, not a table row: seven gantry angles are wider
@@ -481,7 +475,7 @@ def page_table(pdf, criteria, raw, patient, downsampled, criteria_path):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--data-dir", default="../data")
-    ap.add_argument("--patient", default="Lung_Patient_2")
+    ap.add_argument("--patient", required=True, help="PortPy patient ID, e.g. Lung_Patient_3")
     ap.add_argument("--downsample", action="store_true",
                     help="fast sanity check; per-organ metrics are NOT preserved")
     ap.add_argument("--from-cache", action="store_true", help="re-plot without solving")
