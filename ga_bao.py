@@ -20,7 +20,7 @@ then score each candidate beam set by DEACTIVATING the beams it doesn't use
 REQUIREMENTS
 ------------
 - PortPy env with MOSEK (see TEAM_SETUP.md).
-- Patient data downloaded with `--beam-mode all` so a real candidate pool exists
+- Patient data downloaded with `--beam-mode ga` so the no-180 candidate pool exists
   (planner-only data has just ~7 beams).
 - The PortPy down-sampler patch applied (scripts/patch_portpy_downsampler.py),
   otherwise create_down_sample crashes on the current data format.
@@ -28,7 +28,11 @@ REQUIREMENTS
 USAGE
 -----
     python ga_bao.py --patient Lung_Patient_3 --pool 0 3 6 9 ... --k 7
-    python ga_bao.py --patient Lung_Patient_3 --pop 20 --gens 40 --out ga_results.json
+    python ga_bao.py --patient Lung_Patient_3 --pop 20 --gens 40
+
+Results are written under results/<patient>/ga_runs/ by default. The default candidate
+pool excludes 180 degrees because PortPy does not model the treatment couch;
+each patient's clinician beams are added automatically if the grid omits them.
 
 WHERE TO MODIFY (for teammates)
 -------------------------------
@@ -240,8 +244,10 @@ def main():
     ap.add_argument("--data-dir", default=r"../data",
                     help="Path to the PortPy data folder (default: ../data, sibling of the repo).")
     ap.add_argument("--patient", default="Lung_Patient_3")
-    ap.add_argument("--pool", type=int, nargs="+", default=list(range(0, 72, 3)),
-                    help="Candidate beam_ids to search over (needs --beam-mode all data).")
+    ap.add_argument("--pool", type=int, nargs="+",
+                    default=[b for b in range(0, 72, 3) if b != 36],
+                    help="Candidate beam_ids to search over (default: every 15 degrees, "
+                         "excluding 180 degrees; needs --beam-mode ga data).")
     ap.add_argument("--k", type=int, default=7, help="Number of beams to select.")
     ap.add_argument("--pop", type=int, default=20, help="Population size.")
     ap.add_argument("--gens", type=int, default=40, help="Number of generations.")
@@ -250,22 +256,47 @@ def main():
     ap.add_argument("--no-downsample", action="store_true",
                     help="Use full-resolution matrices (slower per solve, more RAM; "
                          "skips patchify + the down-sampler patch).")
-    ap.add_argument("--out", default="ga_results.json")
+    ap.add_argument("--out", default=None,
+                    help="Results JSON (default: results/<patient>/ga_runs/"
+                         "<patient>_ga_<resolution>_seed_<seed>.json).")
     ap.add_argument("--checkpoint", default=None,
-                    help="Cache file for crash-safe resume (default: <out>.cache.json).")
+                    help="Cache file for crash-safe resume (default: matching file in "
+                         "results/<patient>/cache/).")
     args = ap.parse_args()
+
+    resolution = "full_resolution" if args.no_downsample else "downsampled"
+    using_default_out = args.out is None
+    patient_results = Path("results") / args.patient
+    if using_default_out:
+        args.out = str(
+            patient_results / "ga_runs"
+            / f"{args.patient}_ga_{resolution}_seed_{args.seed}.json"
+        )
+    Path(args.out).parent.mkdir(parents=True, exist_ok=True)
 
     # The planner (expert) beams must be reachable from the pool, otherwise a
     # GA-vs-expert comparison is rigged: on Lung_Patient_2 the expert uses beam 37
     # (185 deg), which a 15-deg grid like range(0,72,3) cannot represent.
     planner = json.loads(
         (Path(args.data_dir) / args.patient / "PlannerBeams.json").read_text())["IDs"]
-    missing = sorted(set(planner) - set(args.pool))
+    # Keep 180 degrees excluded even if a patient planner happens to use it. The
+    # clinician plan is still scored exactly as delivered by PortPy; this guard only
+    # prevents the GA from exploiting a couch-free 180-degree beam in simulation.
+    missing = sorted((set(planner) - {36}) - set(args.pool))
     if missing:
         args.pool = sorted(set(args.pool) | set(missing))
         print(f"[pool] added expert beams {missing}; pool is now {len(args.pool)} beams")
+    if 36 in args.pool:
+        raise SystemExit("candidate pool contains beam 36 (180 degrees); remove it for "
+                         "the couch-aware comparison protocol")
 
-    ckpt = args.checkpoint or (args.out + ".cache.json")
+    if args.checkpoint:
+        ckpt = args.checkpoint
+    elif using_default_out:
+        ckpt = str(patient_results / "cache" / (Path(args.out).name + ".cache.json"))
+    else:
+        ckpt = args.out + ".cache.json"
+    Path(ckpt).parent.mkdir(parents=True, exist_ok=True)
 
     problem = BAOProblem(args.data_dir, args.patient, args.pool,
                          downsample=not args.no_downsample)

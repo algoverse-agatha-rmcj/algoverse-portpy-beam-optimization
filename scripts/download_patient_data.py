@@ -19,9 +19,10 @@ Why this script instead of a one-line download call:
 Usage (run from the repo root, with the `portpy` conda env activated):
     python scripts/download_patient_data.py Lung_Patient_3
     python scripts/download_patient_data.py Lung_Patient_3 Lung_Patient_4
-    python scripts/download_patient_data.py --beam-mode all Lung_Patient_3
+    python scripts/download_patient_data.py --beam-mode ga Lung_Patient_3
 """
 import argparse
+import json
 import os
 import sys
 import time
@@ -43,9 +44,10 @@ def main() -> None:
     ap = argparse.ArgumentParser(description="Resilient PortPy data downloader.")
     ap.add_argument("patients", nargs="+", help="e.g. Lung_Patient_3 Lung_Patient_4")
     ap.add_argument("--beam-mode", default="planner",
-                    choices=["planner", "all", "none"],
+                    choices=["planner", "ga", "all", "none"],
                     help="'planner' = only expert beams (default, smaller); "
-                         "'all' = every candidate beam (needed for beam-angle search).")
+                         "'ga' = no-180 GA pool plus clinician beams; "
+                         "'all' = every available beam.")
     ap.add_argument("--max-attempts", type=int, default=40)
     args = ap.parse_args()
 
@@ -61,12 +63,30 @@ def main() -> None:
             try:
                 # NOTE: download_portpy_data creates <out>/data/<patient>,
                 # so out=REPO_PARENT gives <repo_parent>/data/<patient>.
-                pp.download_portpy_data(
-                    patient,
-                    out=str(REPO_PARENT),
-                    beam_mode=args.beam_mode,
-                    max_workers=1,           # <-- the critical setting
-                )
+                if args.beam_mode == "ga":
+                    # Download only the grid the GA can actually select. The first call
+                    # also fetches PlannerBeams.json; the second incrementally adds any
+                    # off-grid clinician beams so the comparison remains fair.
+                    ga_beams = [b for b in range(0, 72, 3) if b != 36]
+                    pp.download_portpy_data(
+                        patient, out=str(REPO_PARENT), beam_mode="ids",
+                        beam_ids=ga_beams, max_workers=1)
+                    planner_path = dest / patient / "PlannerBeams.json"
+                    planner = json.loads(planner_path.read_text())["IDs"]
+                    comparison_beams = sorted(set(ga_beams) | (set(planner) - {36}))
+                    if comparison_beams != ga_beams:
+                        pp.download_portpy_data(
+                            patient, out=str(REPO_PARENT), beam_mode="ids",
+                            beam_ids=comparison_beams, max_workers=1)
+                    print(f"  GA beam pool: {len(comparison_beams)} beams "
+                          f"(180 degrees excluded)")
+                else:
+                    pp.download_portpy_data(
+                        patient,
+                        out=str(REPO_PARENT),
+                        beam_mode=args.beam_mode,
+                        max_workers=1,           # <-- the critical setting
+                    )
                 print(f"  DONE: {patient}\n")
                 break
             except Exception as e:  # noqa: BLE001 - we want to retry on anything

@@ -161,7 +161,8 @@
         "pass_goal": null
       }
     ],
-    "solve_time_s": 42.4
+    "solve_time_s": 42.4,
+    "downsampled": false
   },
   "GA_A_with180": {
     "beams": [
@@ -325,7 +326,8 @@
         "pass_goal": null
       }
     ],
-    "solve_time_s": 42.0
+    "solve_time_s": 42.0,
+    "downsampled": false
   },
   "GA_B_no180": {
     "beams": [
@@ -489,6 +491,7 @@
         "pass_goal": null
       }
     ],
-    "solve_time_s": 42.6
+    "solve_time_s": 42.6,
+    "downsampled": false
   }
 }

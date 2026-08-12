@@ -59,10 +59,11 @@ python scripts/patch_portpy_downsampler.py
 ```
 Re-run this after any `pip install`/reinstall of PortPy.
 
-## 7. Download the patient data (full candidate pool)
-The GA needs the full beam pool, so download with `--beam-mode all` (large, multi-GB download, kept OUTSIDE the repo):
+## 7. Download the patient data (GA candidate pool)
+Download with `--beam-mode ga`. This fetches the no-180 candidate grid plus any
+off-grid clinician beams and keeps the large data outside the repo:
 ```bash
-python scripts/download_patient_data.py Lung_Patient_3 --beam-mode all
+python scripts/download_patient_data.py Lung_Patient_3 --beam-mode ga
 ```
 Data lands in `C:\Users\jpwun\Downloads\data\Lung_Patient_3` — a sibling of the repo, which is where the code expects it.
 
@@ -99,17 +100,23 @@ C:\Users\jpwun\anaconda3\envs\portpy\python.exe ga_bao.py --patient Lung_Patient
 - First ~2 minutes: `[setup] down-sampling 24-beam pool...` — the one-time down-sample; no per-generation output yet.
 - Then one line per generation, live: `gen 0 | gen-best 94.30 | overall-best 94.30 | angles [...] | solves 20`
 - The fitness (lower = better) should trend downward across generations.
-- When finished: a `=== RESULT ===` summary, and results saved to `ga_results.json` in the repo folder.
+- When finished: a `=== RESULT ===` summary, and results saved under
+  `results/<patient>/ga_runs/` (for example,
+  `results/Lung_Patient_3/ga_runs/Lung_Patient_3_ga_downsampled_seed_0.json`).
 
 ## Stopping, resuming, sleeping
 - Press **Ctrl+C** to stop anytime.
-- Re-running the same command **resumes**: it reloads already-solved beam sets from `ga_results.json.cache.json` and continues, wasting no compute.
+- Re-running the same command **resumes**: it reloads the matching `.cache.json` from the
+  patient's `cache/` folder and continues, wasting no compute.
 - If the laptop sleeps mid-run, it picks back up on wake.
 
 ## The knobs you change in the command
 - `--pop` and `--gens` — how hard it searches (and how long it runs). 20 × 40 is a solid real run; 6 × 3 is a quick test. Thorough: 30 × 60 with ~5 seeds.
-- `--pool` — the candidate beam IDs (24-angle pool = every third beam, 0..69).
+- `--pool` — the candidate beam IDs. The default is every third beam from 0..69 with
+  beam 36 (180°) removed because PortPy does not model the treatment couch. Any missing
+  clinician beams are added automatically so the comparison remains fair.
 - `--k` — how many beams to select (7 matches the PortPy benchmark).
 - `--seed` — random seed; change it for an independent run (report mean ± std over several seeds).
 - `--no-downsample` — use full-resolution matrices (slower per solve; for comparing against the expert plan, not the MILP).
-- `--out` — results filename (default `ga_results.json`).
+- `--out` — optional results filename; by default it is organized under
+  `results/<patient>/ga_runs/` and includes the resolution and seed.

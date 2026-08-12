@@ -184,8 +184,8 @@ both repos, which is exactly where the notebooks look (`data_dir='../../data'`),
 keeps the multi-GB data **out of git**.
 
 - Multiple patients: `python scripts/download_patient_data.py Lung_Patient_3 Lung_Patient_4`
-- **For beam-angle search you'll eventually want every candidate beam**, not just the
-  expert's: add `--beam-mode all` (much larger download).
+- **For beam-angle search**, add `--beam-mode ga`. This downloads the no-180 candidate
+  grid plus any off-grid clinician beams, without storing unused beam angles.
 
 > **Why not just call `pp.download_portpy_data(...)` directly?**
 > The data is served from the `xethub.hf.co` CDN, which on many campus/AV networks resets
@@ -214,17 +214,18 @@ If cells 3–13 run and you get a DVH plot and a clinical-criteria table, **you'
 
 ## 9. Running the beam-angle-optimization GA
 
-`ga_bao.py` runs the genetic algorithm. It needs the **full candidate beam pool**,
-so download a patient with `--beam-mode all` first (larger download):
+`ga_bao.py` runs the genetic algorithm. Download its no-180 candidate beam pool first:
 
 ```bash
 # from the project repo root, portpy env active, AFTER steps 3 (patchify) + 5b (patch)
-python scripts/download_patient_data.py Lung_Patient_3 --beam-mode all
+python scripts/download_patient_data.py Lung_Patient_3 --beam-mode ga
 python ga_bao.py --patient Lung_Patient_3 --k 7 --pop 20 --gens 40
 ```
 
-Results (best angles, per-generation history, timing) are written to
-`ga_results.json`. Useful flags: `--pool` (candidate angles), `--k` (beam budget),
+Results (best angles, per-generation history, timing) are written under the patient's
+folder in `results/`, for example
+`results/Lung_Patient_3/ga_runs/Lung_Patient_3_ga_downsampled_seed_0.json`.
+Useful flags: `--pool` (candidate angles), `--k` (beam budget),
 `--pop` / `--gens` (search size = compute budget), `--mutation-rate`, `--seed`.
 
 **Where to modify the code** (`ga_bao.py`):
@@ -298,8 +299,8 @@ cd algoverse-portpy-beam-optimization
 python scripts/patch_portpy_downsampler.py
 # MOSEK license -> ~/mosek/mosek.lic  (request at mosek.com, .edu email)
 
-# 5. data (single-connection, resumable). --beam-mode all needed for the GA's beam pool
-python scripts/download_patient_data.py Lung_Patient_3 --beam-mode all
+# 5. data (single-connection, resumable). Downloads only the no-180 GA pool.
+python scripts/download_patient_data.py Lung_Patient_3 --beam-mode ga
 
 # 6. run the GA
 python ga_bao.py --patient Lung_Patient_3 --k 7 --pop 20 --gens 40
