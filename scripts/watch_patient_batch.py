@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Live, dependency-free monitor for the Lung_Patient_3..6 BAO batch.
+"""Live, dependency-free monitor for a lung-patient BAO batch.
 
 The dashboard is deliberately read-only and stateless: it reconstructs progress
 from running command lines, PortPy data files, and the normal result artifacts.
@@ -20,7 +20,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DATA_ROOT = REPO_ROOT.parent / "data"
 RESULTS_ROOT = REPO_ROOT / "results"
-PATIENTS = tuple(f"Lung_Patient_{number}" for number in range(3, 7))
+DEFAULT_PATIENTS = tuple(f"Lung_Patient_{number}" for number in range(15, 21))
 GA_GRID = frozenset(beam for beam in range(0, 72, 3) if beam != 36)
 
 RESET = "\033[0m"
@@ -193,11 +193,11 @@ def artifact_snapshot(patient: str):
     }
 
 
-def active_stages(processes, snapshots):
+def active_stages(processes, snapshots, patients):
     """Map patients to (stage, elapsed), resolving multi-patient downloads."""
     active = {}
     for elapsed, command in processes:
-        mentioned = [patient for patient in PATIENTS if patient in command]
+        mentioned = [patient for patient in patients if patient in command]
         if not mentioned:
             continue
         if "download_patient_data.py" in command:
@@ -266,11 +266,13 @@ def colorize(value: str, color: str, enabled: bool) -> str:
     return f"{COLORS[color]}{value}{RESET}" if enabled else value
 
 
-def render(snapshots, active, ps_available: bool, use_color: bool) -> str:
+def render(snapshots, active, patients, ps_available: bool, use_color: bool) -> str:
     now = time.strftime("%Y-%m-%d %H:%M:%S")
-    title = f"Algoverse BAO batch · patients 3–6 · {now}"
+    numbers = [patient.rsplit("_", 1)[1] for patient in patients]
+    span = f"{numbers[0]}–{numbers[-1]}" if len(numbers) > 1 else numbers[0]
+    title = f"Algoverse BAO batch · patients {span} · {now}"
     lines = [colorize(title, "bold", use_color), ""]
-    widths = (9, 14, 14, 6, 8, 6, 7, 10, 4, 10)
+    widths = (11, 14, 14, 6, 8, 6, 7, 10, 4, 10)
     headers = ("Patient", "Stage", "Beams · GB", "Gen", "Best", "Solves", "GA wall",
                "Compare", "DVH", "Raw data")
 
@@ -279,7 +281,8 @@ def render(snapshots, active, ps_available: bool, use_color: bool) -> str:
 
     lines.append(colorize(row(headers), "dim", use_color))
     lines.append("─┼─".join("─" * width for width in widths))
-    for number, patient in enumerate(PATIENTS, 3):
+    for patient in patients:
+        number = patient.rsplit("_", 1)[1]
         snapshot = snapshots[patient]
         stage, process_elapsed = inferred_stage(snapshot, active.get(patient))
         expected = snapshot["expected"]
@@ -336,22 +339,25 @@ def render(snapshots, active, ps_available: bool, use_color: bool) -> str:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Watch Lung_Patient_3 through Lung_Patient_6.")
+    parser = argparse.ArgumentParser(description="Watch a lung-patient BAO batch.")
+    parser.add_argument("patients", nargs="*", default=list(DEFAULT_PATIENTS),
+                        help="patients to watch (default: Lung_Patient_15..20)")
     parser.add_argument("--once", action="store_true", help="print one snapshot and exit")
     parser.add_argument("--interval", type=float, default=5.0, help="refresh seconds (default: 5)")
     args = parser.parse_args()
     if args.interval <= 0:
         parser.error("--interval must be positive")
+    patients = args.patients or list(DEFAULT_PATIENTS)
 
     use_color = sys.stdout.isatty()
     try:
         if not args.once and use_color:
             sys.stdout.write("\033[?25l")
         while True:
-            snapshots = {patient: artifact_snapshot(patient) for patient in PATIENTS}
+            snapshots = {patient: artifact_snapshot(patient) for patient in patients}
             processes, ps_available = process_snapshot()
-            active = active_stages(processes, snapshots)
-            output = render(snapshots, active, ps_available, use_color)
+            active = active_stages(processes, snapshots, patients)
+            output = render(snapshots, active, patients, ps_available, use_color)
             if not args.once and use_color:
                 sys.stdout.write("\033[2J\033[H")
             print(output, flush=True)

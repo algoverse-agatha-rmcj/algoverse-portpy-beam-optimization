@@ -22,7 +22,15 @@ else:
 ROOT = Path(__file__).resolve().parents[1]
 DATA_ROOT = ROOT.parent / "data"
 PYTHON = ROOT.parent / "portpy-venv" / "bin" / "python"
-PATIENT_RE = re.compile(r"Lung_Patient_[3-6]\Z")
+# PortPy's Hugging Face catalogue publishes Lung_Patient_2 through Lung_Patient_202
+# contiguously; anything outside that range is a typo, not a patient.
+PATIENT_RE = re.compile(r"Lung_Patient_(\d+)\Z")
+PATIENT_RANGE = range(2, 203)
+
+
+def valid_patient(patient: str) -> bool:
+    match = PATIENT_RE.fullmatch(patient)
+    return match is not None and int(match.group(1)) in PATIENT_RANGE
 
 
 def run(*args: str) -> None:
@@ -55,7 +63,7 @@ def paths(patient: str) -> dict[str, Path]:
     }
 
 
-def ga_complete(path: Path) -> bool:
+def ga_complete(path: Path, patient: str) -> bool:
     if not path.exists():
         return False
     data = load_json(path)
@@ -65,7 +73,7 @@ def ga_complete(path: Path) -> bool:
     pool = data.get("pool")
     best_angles = data.get("best_angles")
     return (
-        data.get("patient") in {f"Lung_Patient_{i}" for i in range(3, 7)}
+        data.get("patient") == patient
         and data.get("gens") == 40
         and isinstance(history, list)
         and len(history) == 40
@@ -76,11 +84,11 @@ def ga_complete(path: Path) -> bool:
     )
 
 
-def wait_for_external_ga(path: Path) -> bool:
+def wait_for_external_ga(path: Path, patient: str) -> bool:
     """Wait for a GA already writing this result; return false if it goes stale."""
     if not path.exists() or time.time() - path.stat().st_mtime > 120:
         return False
-    while not ga_complete(path):
+    while not ga_complete(path, patient):
         age = time.time() - path.stat().st_mtime
         if age > 120:
             print(f"GA checkpoint stale for {age:.0f}s; resuming it here", flush=True)
@@ -210,7 +218,7 @@ full-resolution JSON and matching PDF, not the reduced-resolution comparison.
 
 
 def delete_raw_data(patient: str, data_dir: Path) -> None:
-    if not PATIENT_RE.fullmatch(patient):
+    if not valid_patient(patient):
         raise RuntimeError(f"refusing cleanup for unexpected patient name: {patient}")
     if data_dir.parent.resolve() != DATA_ROOT.resolve():
         raise RuntimeError(f"refusing cleanup outside {DATA_ROOT}: {data_dir}")
@@ -224,7 +232,7 @@ def process(patient: str, keep_data: bool) -> None:
     print(f"\n{'=' * 72}\n{patient}\n{'=' * 72}", flush=True)
 
     bundle_complete = (
-        ga_complete(p["ga"])
+        ga_complete(p["ga"], patient)
         and comparison_complete(p["down"], True)
         and comparison_complete(p["full"], False)
         and p["pdf"].exists()
@@ -232,7 +240,7 @@ def process(patient: str, keep_data: bool) -> None:
     if not bundle_complete and not data_complete(patient):
         run("scripts/download_patient_data.py", "--beam-mode", "ga", patient)
 
-    if not ga_complete(p["ga"]) and not wait_for_external_ga(p["ga"]):
+    if not ga_complete(p["ga"], patient) and not wait_for_external_ga(p["ga"], patient):
         run("ga_bao.py", "--patient", patient, "--k", "7", "--pop", "20",
             "--gens", "40", "--seed", "0")
     if not comparison_complete(p["down"], True):
@@ -251,13 +259,16 @@ def process(patient: str, keep_data: bool) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("patients", nargs="*", default=[f"Lung_Patient_{i}" for i in range(3, 7)])
+    parser.add_argument("patients", nargs="+", help="e.g. Lung_Patient_15 Lung_Patient_16")
     parser.add_argument("--keep-data", action="store_true")
     args = parser.parse_args()
 
     for patient in args.patients:
-        if not PATIENT_RE.fullmatch(patient):
-            parser.error(f"unsupported patient {patient!r}; expected Lung_Patient_3 through _6")
+        if not valid_patient(patient):
+            parser.error(
+                f"unsupported patient {patient!r}; expected Lung_Patient_2 "
+                f"through Lung_Patient_202"
+            )
     if not PYTHON.exists():
         parser.error(f"PortPy environment not found: {PYTHON}")
 
