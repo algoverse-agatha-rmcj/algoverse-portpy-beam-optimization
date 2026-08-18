@@ -16,6 +16,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from ga_bao import BAOProblem  # noqa: E402
+from beam_angles import fetch_angle_map, grid_pool  # noqa: E402
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--data-dir", default="../data")
@@ -29,7 +30,9 @@ args = ap.parse_args()
 planner = json.loads(
     (Path(args.data_dir) / args.patient / "PlannerBeams.json").read_text())["IDs"]
 beams = args.beams or planner
-pool = args.pool or sorted(set(range(0, 72, 3)) | set(planner))
+# Pool derived from real gantry angles; see beam_angles.py.
+_angles = fetch_angle_map(args.patient, args.data_dir)
+pool = args.pool or sorted(set(grid_pool(_angles)) | set(map(int, planner)))
 
 print(f"patient : {args.patient}")
 print(f"planner : {planner}")

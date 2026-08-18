@@ -39,7 +39,7 @@ class BatchValidationTests(unittest.TestCase):
             }
             paths["ga"].write_text(json.dumps({"patient": "Lung_Patient_3"}))
             with self.assertRaisesRegex(RuntimeError, "missing required keys"):
-                validate_bundle("Lung_Patient_3", paths)
+                validate_bundle("Lung_Patient_3", paths, set())
 
 
 
@@ -67,8 +67,8 @@ class PatientSelectionTests(unittest.TestCase):
                 "best_angles": [0, 3, 6],
             }
             path.write_text(json.dumps(payload))
-            self.assertTrue(ga_complete(path, "Lung_Patient_15"))
-            self.assertFalse(ga_complete(path, "Lung_Patient_16"))
+            self.assertTrue(ga_complete(path, "Lung_Patient_15", set()))
+            self.assertFalse(ga_complete(path, "Lung_Patient_16", set()))
 
 
 if __name__ == "__main__":

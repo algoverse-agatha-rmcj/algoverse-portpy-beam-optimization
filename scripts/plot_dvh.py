@@ -25,9 +25,13 @@ matrix load), so the curves are cached to an .npz. Re-plotting is free:
 """
 import argparse
 import json
+import sys
 import textwrap
 import time
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from beam_angles import fetch_angle_map, format_angles
 
 import numpy as np
 import matplotlib
@@ -37,6 +41,10 @@ from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib.lines import Line2D
 
 import portpy.photon as pp
+
+# beam_id -> real gantry angle for the patient being plotted; filled in by main().
+# Never derive an angle from the ID: that arithmetic is wrong from Lung_Patient_11 on.
+ANGLES: dict[int, float] = {}
 
 if __package__:
     from .metric_ranking import select_best_plans
@@ -101,7 +109,8 @@ def collect(data_dir, patient, downsample, cache_path, beam_sets):
     out = {}
     for name in PLANS:
         beams = beam_sets[name]
-        print(f"\n=== {name}: beams {beams} ({[b * 5 for b in beams]} deg) ===", flush=True)
+        print(f"\n=== {name}: beams {beams} "
+              f"({format_angles(ANGLES, beams)}) ===", flush=True)
         t0 = time.time()
         plan, sol, dose_1d, obj = solve_set(data_dir, patient, beams, downsample)
         for s in STRUCTS:
@@ -452,7 +461,7 @@ def page_table(pdf, criteria, raw, patient, downsampled, criteria_path):
     head = "Beam angles (gantry°)"
     beams = "\n".join(
         f"{head if i == 0 else '':<{len(head)}s}   {HEAD[n][0]:<10s} "
-        f"{', '.join(str(int(b) * 5) for b in raw[n]['beams'])}"
+        f"{format_angles(ANGLES, raw[n]['beams'])}"
         for i, n in enumerate(PLANS))
     fig.text(label_x, 0.135, beams, fontsize=7.5, color=MUTED, va="top",
              linespacing=1.65, family="monospace")
@@ -486,6 +495,9 @@ def main():
                          "pages 2 and 3, and must describe the same solve as the curves")
     ap.add_argument("--out", default=None)
     args = ap.parse_args()
+
+    global ANGLES
+    ANGLES = fetch_angle_map(args.patient, args.data_dir)
 
     patient_results = Path("results") / args.patient
     resolution = "downsampled" if args.downsample else "full_resolution"
