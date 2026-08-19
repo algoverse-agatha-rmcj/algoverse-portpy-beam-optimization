@@ -458,7 +458,19 @@ def overall_eta(snapshots, patients):
 def render(snapshots, active, patients, ps_available, use_color, width) -> str:
     now = time.strftime("%Y-%m-%d %H:%M:%S")
     numbers = [p.rsplit("_", 1)[1] for p in patients]
-    span = f"{numbers[0]}–{numbers[-1]}" if len(numbers) > 1 else numbers[0]
+    # Span is the numeric range, not the first and last of the argument order: a batch
+    # is often ordered by expected runtime, so "7 9 11 14 12 13 8 10" would otherwise
+    # advertise itself as "7-10" and hide half the work.
+    ordered = sorted(numbers, key=lambda n: int(n) if n.isdigit() else 0)
+    if len(ordered) <= 1:
+        span = ordered[0] if ordered else "none"
+    else:
+        contiguous = all(n.isdigit() for n in ordered) and (
+            int(ordered[-1]) - int(ordered[0]) + 1 == len(ordered)
+        )
+        span = f"{ordered[0]}–{ordered[-1]}"
+        if not contiguous:
+            span += f" ({len(ordered)} patients)"
 
     headers = ("Patient", "Stage", "Data", "Beams", "Gen", "Best",
                "Solves", "GA wall", "Compare", "DVH", "Raw data")
