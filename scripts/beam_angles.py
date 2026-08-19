@@ -23,12 +23,17 @@ on the ID.
 from __future__ import annotations
 
 import json
+import time
 from pathlib import Path
 
 REPO_ID = "PortPy-Project/PortPy_Dataset"
 GRID_STEP_DEG = 15.0
 EXCLUDED_DEG = (180.0,)
 _TOL = 1e-6
+# Retry budget for the metadata fetch: ~10 min of transient-outage tolerance.
+FETCH_ATTEMPTS = 8
+FETCH_BACKOFF_BASE_S = 5
+FETCH_BACKOFF_CAP_S = 120
 
 
 def _beam_id(path: Path) -> int:
@@ -61,18 +66,37 @@ def fetch_angle_map(patient: str, data_dir, token=None) -> dict[int, float]:
     from huggingface_hub import snapshot_download
 
     out = Path(data_dir).parent
-    snapshot_download(
-        repo_id=REPO_ID,
-        repo_type="dataset",
-        allow_patterns=[
-            f"data/{patient}/Beams/Beam_*_MetaData.json",
-            f"data/{patient}/PlannerBeams.json",
-        ],
-        local_dir=str(out),
-        max_workers=1,
-        token=token,
-    )
-    return local_angle_map(patient, data_dir)
+    # A dropped connection here used to abort the whole batch. The metadata fetch is
+    # the first network call for each patient, so a blip between two patients killed
+    # every remaining hour of work even though the run was otherwise healthy.
+    # download_patient_data.py already retries its bulk download; this did not.
+    last = None
+    for attempt in range(1, FETCH_ATTEMPTS + 1):
+        try:
+            snapshot_download(
+                repo_id=REPO_ID,
+                repo_type="dataset",
+                allow_patterns=[
+                    f"data/{patient}/Beams/Beam_*_MetaData.json",
+                    f"data/{patient}/PlannerBeams.json",
+                ],
+                local_dir=str(out),
+                max_workers=1,
+                token=token,
+            )
+            return local_angle_map(patient, data_dir)
+        except Exception as exc:   # network, DNS, and partial-snapshot errors alike
+            last = exc
+            if attempt == FETCH_ATTEMPTS:
+                break
+            delay = min(FETCH_BACKOFF_CAP_S, 2 ** (attempt - 1) * FETCH_BACKOFF_BASE_S)
+            print(f"[retry] {patient} metadata fetch failed "
+                  f"({type(exc).__name__}), attempt {attempt}/{FETCH_ATTEMPTS}; "
+                  f"waiting {delay}s", flush=True)
+            time.sleep(delay)
+    raise RuntimeError(
+        f"could not fetch beam metadata for {patient} after {FETCH_ATTEMPTS} attempts"
+    ) from last
 
 
 def _is_multiple(angle: float, step: float) -> bool:
