@@ -28,6 +28,8 @@ PYTHON = ROOT.parent / "portpy-venv" / "bin" / "python"
 # contiguously; anything outside that range is a typo, not a patient.
 PATIENT_RE = re.compile(r"Lung_Patient_(\d+)\Z")
 PATIENT_RANGE = range(2, 203)
+# A download that exits 0 is not proof it fetched the whole pool.
+DOWNLOAD_ATTEMPTS = 3
 
 
 def valid_patient(patient: str) -> bool:
@@ -250,7 +252,21 @@ def process(patient: str, keep_data: bool) -> None:
         and p["pdf"].exists()
     )
     if not bundle_complete and not data_complete(patient):
-        run("scripts/download_patient_data.py", "--beam-mode", "ga", patient)
+        # The downloader can exit 0 having fetched only part of the pool: Patient 12
+        # stopped at beam 65, reported DONE, and the GA then died on the first missing
+        # Beam_*_Data.h5 an hour into the batch. data_complete() already knows what the
+        # pool requires, so re-ask it after each attempt instead of trusting the exit code.
+        for attempt in range(1, DOWNLOAD_ATTEMPTS + 1):
+            run("scripts/download_patient_data.py", "--beam-mode", "ga", patient)
+            if data_complete(patient):
+                break
+            if attempt == DOWNLOAD_ATTEMPTS:
+                raise RuntimeError(
+                    f"{patient}: download still incomplete after {DOWNLOAD_ATTEMPTS} "
+                    "attempts; the beam pool is missing files on disk"
+                )
+            print(f"[retry] {patient} download incomplete, "
+                  f"attempt {attempt}/{DOWNLOAD_ATTEMPTS}", flush=True)
 
     if not ga_complete(p["ga"], patient, dropped) and not wait_for_external_ga(
             p["ga"], patient, dropped):
