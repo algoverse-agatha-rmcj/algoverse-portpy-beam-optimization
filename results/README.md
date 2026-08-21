@@ -37,6 +37,25 @@ beam's real gantry angle, so all of them are directly comparable.
 Both exclusions are defects in the released data, not choices about method, and neither can
 be worked around from this repository.
 
+Regenerate the cohort-level JSON and paper-ready Markdown summary from the authoritative
+full-resolution comparisons with:
+
+```bash
+python3 scripts/analyze_cohort.py
+```
+
+This writes `results/cohort_analysis.json` and `results/cohort_analysis.md`. All aggregate
+statistics use arithmetic means; per-patient values and timing tails remain visible for
+outlier review.
+
+Generate the manuscript table and vector cohort figure from that same source with:
+
+```bash
+python3 scripts/generate_paper_assets.py
+```
+
+The generated files and their suggested caption are documented in `results/paper/README.md`.
+
 **`Lung_Patient_12` is excluded, and cannot be run as published.** PortPy ships
 `MetaData.json` for 80 of its beams but a dose-influence matrix (`Beam_*_Data.h5`) for only
 63. The 17 beams with metadata and no dose data are 8, 9, 61, and 66-79, and three of them

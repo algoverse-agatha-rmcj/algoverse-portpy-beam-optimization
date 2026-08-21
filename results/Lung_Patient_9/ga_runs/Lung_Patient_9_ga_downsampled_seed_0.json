@@ -93,7 +93,6 @@
   "solve_time_s": {
     "measured_solves": 675,
     "mean_s": 4.986,
-    "median_s": 4.957,
     "p95_s": 5.289,
     "min_s": 4.744,
     "max_s": 5.73,

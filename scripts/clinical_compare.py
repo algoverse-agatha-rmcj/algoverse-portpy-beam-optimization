@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """Re-solve beam sets at FULL resolution and score them against the protocol's clinical criteria.
 
 The GA searches on down-sampled data, so its objective values are not a defensible
@@ -14,12 +14,14 @@ is far cheaper in memory.
 """
 import argparse
 import json
+import math
 import sys
 import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from beam_angles import excluded_ids, fetch_angle_map
+from beam_angles import excluded_ids, fetch_angle_map, format_angles
+from objective_terms import active_objective_specs, serialize_objective_terms
 
 import portpy.photon as pp
 
@@ -53,7 +55,27 @@ def solve_set(data_dir, patient, beams, downsample):
     opt = pp.Optimization(plan, opt_params=opt_params, clinical_criteria=cc)
     opt.create_cvxpy_problem()
     sol, prob = opt.solve(solver="MOSEK", verbose=False, return_cvxpy_prob=True)
-    return plan, cc, sol, float(prob.value), inf.A.shape
+    structure_names = set(plan.structures.get_structures())
+    nonempty_structures = {
+        structure for structure in structure_names
+        if len(inf.get_opt_voxels_idx(structure)) > 0
+    }
+    specs = active_objective_specs(
+        opt_params.get("objective_functions", []),
+        structure_names,
+        nonempty_structures,
+    )
+    objective_terms = serialize_objective_terms(
+        specs, [expression.value for expression in opt.obj]
+    )
+    if not math.isclose(
+        sum(row["value"] for row in objective_terms),
+        float(prob.value),
+        rel_tol=1e-6,
+        abs_tol=1e-6,
+    ):
+        raise RuntimeError("serialized objective terms do not sum to total objective")
+    return plan, cc, sol, float(prob.value), inf.A.shape, objective_terms
 
 
 def criteria_table(cc, sol, dose_1d):
@@ -115,8 +137,8 @@ def main():
         )
     ga_beams = [int(b) for b in ga_result["best_angles"]]
     # Checked by real gantry angle: beam 36 is 180 degrees only on patients 2-10.
-    at_180 = sorted(excluded_ids(fetch_angle_map(args.patient, args.data_dir))
-                    .intersection(ga_beams))
+    angle_map = fetch_angle_map(args.patient, args.data_dir)
+    at_180 = sorted(excluded_ids(angle_map).intersection(ga_beams))
     if at_180:
         raise SystemExit(
             f"{ga_result_path}: GA winner contains beam(s) {at_180} at 180 degrees; "
@@ -140,15 +162,22 @@ def main():
 
     results = {}
     for name, beams in plans.items():
-        print(f"\n=== {name}: beams {beams}  ({[b*5 for b in beams]} deg) ===", flush=True)
+        print(
+            f"\n=== {name}: beams {beams}  "
+            f"({format_angles(angle_map, beams)}) ===",
+            flush=True,
+        )
         t0 = time.time()
-        plan, cc, sol, obj, shape = solve_set(args.data_dir, args.patient, beams, args.downsample)
+        plan, cc, sol, obj, shape, objective_terms = solve_set(
+            args.data_dir, args.patient, beams, args.downsample
+        )
         # sol has no 'dose_1d'; criteria are whole-course Gy, so scale by fractions.
         dose_1d = sol["inf_matrix"].A @ (sol["optimal_intensity"] * plan.get_num_of_fractions())
         rows = criteria_table(cc, sol, dose_1d)
         ptv_d95 = float(pp.Evaluation.get_dose(sol, struct="PTV", volume_per=95,
                                                dose_1d=dose_1d))
-        results[name] = {"beams": beams, "objective": obj, "A_shape": list(shape),
+        results[name] = {"beams": beams, "objective": obj,
+                         "objective_terms": objective_terms, "A_shape": list(shape),
                          "downsampled": bool(args.downsample),
                          "PTV_D95_Gy": ptv_d95, "criteria": rows,
                          "solve_time_s": round(time.time() - t0, 1)}

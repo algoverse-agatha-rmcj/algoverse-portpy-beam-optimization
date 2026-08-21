@@ -1,0 +1,10 @@
+metric,n,unit,clinician,ga,delta
+PTV D95,17,Gy,59.483407,59.667089,0.183682
+GTV maximum,17,Gy,63.674692,62.818224,-0.856468
+PTV maximum,17,Gy,65.317717,64.454835,-0.862882
+Esophagus mean,17,Gy,8.954365,8.454382,-0.499983
+Heart mean,16,Gy,5.179591,4.642349,-0.537241
+Left-lung maximum,17,Gy,33.161087,42.173965,9.012878
+Lungs excluding GTV mean,17,Gy,8.273272,8.541641,0.268369
+Lungs excluding GTV V20,17,%,15.235818,15.203142,-0.032677
+Protocol-limit violations,17,count,1.000000,0.000000,-1.000000

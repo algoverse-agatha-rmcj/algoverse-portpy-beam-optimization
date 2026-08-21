@@ -7,6 +7,17 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class CommittedResultTests(unittest.TestCase):
+    def test_solve_time_summaries_use_mean_not_median(self):
+        ga_paths = ROOT.glob("results/*/ga_runs/*_ga_downsampled_seed_0.json")
+        summaries = []
+        for ga_path in ga_paths:
+            summary = json.loads(ga_path.read_text()).get("solve_time_s")
+            if summary is not None:
+                summaries.append(summary)
+                self.assertIn("mean_s", summary)
+                self.assertNotIn("median_s", summary)
+        self.assertGreater(len(summaries), 0)
+
     def test_patients_2_through_6_have_complete_consistent_bundles(self):
         for number in range(2, 7):
             with self.subTest(patient=number):
