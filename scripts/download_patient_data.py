@@ -39,6 +39,9 @@ os.environ.setdefault("HF_XET_DISABLE", "1")
 #   parents[2] = <repo_parent>   <-- we download here; data lands in <repo_parent>/data
 REPO_PARENT = Path(__file__).resolve().parents[2]
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from beam_angles import excluded_ids, fetch_angle_map, grid_pool
+
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="Resilient PortPy data downloader.")
@@ -64,22 +67,24 @@ def main() -> None:
                 # NOTE: download_portpy_data creates <out>/data/<patient>,
                 # so out=REPO_PARENT gives <repo_parent>/data/<patient>.
                 if args.beam_mode == "ga":
-                    # Download only the grid the GA can actually select. The first call
-                    # also fetches PlannerBeams.json; the second incrementally adds any
-                    # off-grid clinician beams so the comparison remains fair.
-                    ga_beams = [b for b in range(0, 72, 3) if b != 36]
-                    pp.download_portpy_data(
-                        patient, out=str(REPO_PARENT), beam_mode="ids",
-                        beam_ids=ga_beams, max_workers=1)
+                    # Choose the pool from real gantry angles before pulling any
+                    # multi-gigabyte beam. Beam IDs do not encode the angle from
+                    # Lung_Patient_11 onward, so `range(0, 72, 3)` would download an
+                    # arbitrary set of angles on those patients. See beam_angles.py.
+                    angles = fetch_angle_map(patient, dest)
+                    ga_beams = grid_pool(angles)
                     planner_path = dest / patient / "PlannerBeams.json"
                     planner = json.loads(planner_path.read_text())["IDs"]
-                    comparison_beams = sorted(set(ga_beams) | (set(planner) - {36}))
-                    if comparison_beams != ga_beams:
-                        pp.download_portpy_data(
-                            patient, out=str(REPO_PARENT), beam_mode="ids",
-                            beam_ids=comparison_beams, max_workers=1)
-                    print(f"  GA beam pool: {len(comparison_beams)} beams "
-                          f"(180 degrees excluded)")
+                    dropped = excluded_ids(angles)
+                    comparison_beams = sorted(
+                        set(ga_beams) | (set(map(int, planner)) - dropped))
+                    pp.download_portpy_data(
+                        patient, out=str(REPO_PARENT), beam_mode="ids",
+                        beam_ids=comparison_beams, max_workers=1)
+                    grid = sorted(angles[b] for b in ga_beams)
+                    print(f"  GA beam pool: {len(ga_beams)} beams at "
+                          f"{grid[0]:g}-{grid[-1]:g} deg (180 degrees excluded); "
+                          f"{len(comparison_beams)} beams downloaded with clinician set")
                 else:
                     pp.download_portpy_data(
                         patient,

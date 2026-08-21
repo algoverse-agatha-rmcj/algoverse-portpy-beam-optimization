@@ -1,0 +1,698 @@
+{
+  "patient": "Lung_Patient_14",
+  "pool": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    9,
+    12,
+    15,
+    18,
+    21,
+    24,
+    27,
+    33,
+    36,
+    39,
+    45,
+    48,
+    51,
+    54,
+    57,
+    60,
+    63,
+    66,
+    69,
+    72,
+    75
+  ],
+  "k": 7,
+  "pop": 20,
+  "gens": 40,
+  "mutation_rate": 0.15,
+  "seed": 0,
+  "best_angles": [
+    3,
+    15,
+    21,
+    24,
+    39,
+    45,
+    48
+  ],
+  "best_fitness": 85.6957118768817,
+  "pool_gantry_deg": [
+    200.0,
+    175.0,
+    155.0,
+    120.0,
+    32.0,
+    0.0,
+    15.0,
+    30.0,
+    45.0,
+    60.0,
+    75.0,
+    90.0,
+    105.0,
+    135.0,
+    150.0,
+    165.0,
+    195.0,
+    210.0,
+    225.0,
+    240.0,
+    255.0,
+    270.0,
+    285.0,
+    300.0,
+    315.0,
+    330.0,
+    345.0
+  ],
+  "best_gantry_deg": [
+    120.0,
+    45.0,
+    75.0,
+    90.0,
+    165.0,
+    195.0,
+    210.0
+  ],
+  "unique_solves": 693,
+  "wall_time_s": 4580.4,
+  "solve_time_s": {
+    "measured_solves": 693,
+    "mean_s": 6.564,
+    "median_s": 6.459,
+    "p95_s": 7.382,
+    "min_s": 5.916,
+    "max_s": 9.085,
+    "total_s": 4549.1
+  },
+  "history": [
+    {
+      "gen": 0,
+      "gen_best_fitness": 91.633661939277,
+      "overall_best_fitness": 91.633661939277,
+      "best_angles": [
+        2,
+        3,
+        18,
+        21,
+        39,
+        45,
+        48
+      ],
+      "unique_solves": 20
+    },
+    {
+      "gen": 1,
+      "gen_best_fitness": 91.633661939277,
+      "overall_best_fitness": 91.633661939277,
+      "best_angles": [
+        2,
+        3,
+        18,
+        21,
+        39,
+        45,
+        48
+      ],
+      "unique_solves": 38
+    },
+    {
+      "gen": 2,
+      "gen_best_fitness": 86.89637619743266,
+      "overall_best_fitness": 86.89637619743266,
+      "best_angles": [
+        3,
+        18,
+        21,
+        24,
+        39,
+        45,
+        48
+      ],
+      "unique_solves": 56
+    },
+    {
+      "gen": 3,
+      "gen_best_fitness": 86.89637619743266,
+      "overall_best_fitness": 86.89637619743266,
+      "best_angles": [
+        3,
+        18,
+        21,
+        24,
+        39,
+        45,
+        48
+      ],
+      "unique_solves": 74
+    },
+    {
+      "gen": 4,
+      "gen_best_fitness": 86.89637619743266,
+      "overall_best_fitness": 86.89637619743266,
+      "best_angles": [
+        3,
+        18,
+        21,
+        24,
+        39,
+        45,
+        48
+      ],
+      "unique_solves": 92
+    },
+    {
+      "gen": 5,
+      "gen_best_fitness": 86.87312624291182,
+      "overall_best_fitness": 86.87312624291182,
+      "best_angles": [
+        1,
+        3,
+        18,
+        21,
+        24,
+        45,
+        48
+      ],
+      "unique_solves": 111
+    },
+    {
+      "gen": 6,
+      "gen_best_fitness": 86.87312624291182,
+      "overall_best_fitness": 86.87312624291182,
+      "best_angles": [
+        1,
+        3,
+        18,
+        21,
+        24,
+        45,
+        48
+      ],
+      "unique_solves": 128
+    },
+    {
+      "gen": 7,
+      "gen_best_fitness": 85.6957118768817,
+      "overall_best_fitness": 85.6957118768817,
+      "best_angles": [
+        3,
+        15,
+        21,
+        24,
+        39,
+        45,
+        48
+      ],
+      "unique_solves": 146
+    },
+    {
+      "gen": 8,
+      "gen_best_fitness": 85.6957118768817,
+      "overall_best_fitness": 85.6957118768817,
+      "best_angles": [
+        3,
+        15,
+        21,
+        24,
+        39,
+        45,
+        48
+      ],
+      "unique_solves": 164
+    },
+    {
+      "gen": 9,
+      "gen_best_fitness": 85.6957118768817,
+      "overall_best_fitness": 85.6957118768817,
+      "best_angles": [
+        3,
+        15,
+        21,
+        24,
+        39,
+        45,
+        48
+      ],
+      "unique_solves": 181
+    },
+    {
+      "gen": 10,
+      "gen_best_fitness": 85.6957118768817,
+      "overall_best_fitness": 85.6957118768817,
+      "best_angles": [
+        3,
+        15,
+        21,
+        24,
+        39,
+        45,
+        48
+      ],
+      "unique_solves": 199
+    },
+    {
+      "gen": 11,
+      "gen_best_fitness": 85.6957118768817,
+      "overall_best_fitness": 85.6957118768817,
+      "best_angles": [
+        3,
+        15,
+        21,
+        24,
+        39,
+        45,
+        48
+      ],
+      "unique_solves": 215
+    },
+    {
+      "gen": 12,
+      "gen_best_fitness": 85.6957118768817,
+      "overall_best_fitness": 85.6957118768817,
+      "best_angles": [
+        3,
+        15,
+        21,
+        24,
+        39,
+        45,
+        48
+      ],
+      "unique_solves": 233
+    },
+    {
+      "gen": 13,
+      "gen_best_fitness": 85.6957118768817,
+      "overall_best_fitness": 85.6957118768817,
+      "best_angles": [
+        3,
+        15,
+        21,
+        24,
+        39,
+        45,
+        48
+      ],
+      "unique_solves": 251
+    },
+    {
+      "gen": 14,
+      "gen_best_fitness": 85.6957118768817,
+      "overall_best_fitness": 85.6957118768817,
+      "best_angles": [
+        3,
+        15,
+        21,
+        24,
+        39,
+        45,
+        48
+      ],
+      "unique_solves": 268
+    },
+    {
+      "gen": 15,
+      "gen_best_fitness": 85.6957118768817,
+      "overall_best_fitness": 85.6957118768817,
+      "best_angles": [
+        3,
+        15,
+        21,
+        24,
+        39,
+        45,
+        48
+      ],
+      "unique_solves": 285
+    },
+    {
+      "gen": 16,
+      "gen_best_fitness": 85.6957118768817,
+      "overall_best_fitness": 85.6957118768817,
+      "best_angles": [
+        3,
+        15,
+        21,
+        24,
+        39,
+        45,
+        48
+      ],
+      "unique_solves": 302
+    },
+    {
+      "gen": 17,
+      "gen_best_fitness": 85.6957118768817,
+      "overall_best_fitness": 85.6957118768817,
+      "best_angles": [
+        3,
+        15,
+        21,
+        24,
+        39,
+        45,
+        48
+      ],
+      "unique_solves": 321
+    },
+    {
+      "gen": 18,
+      "gen_best_fitness": 85.6957118768817,
+      "overall_best_fitness": 85.6957118768817,
+      "best_angles": [
+        3,
+        15,
+        21,
+        24,
+        39,
+        45,
+        48
+      ],
+      "unique_solves": 340
+    },
+    {
+      "gen": 19,
+      "gen_best_fitness": 85.6957118768817,
+      "overall_best_fitness": 85.6957118768817,
+      "best_angles": [
+        3,
+        15,
+        21,
+        24,
+        39,
+        45,
+        48
+      ],
+      "unique_solves": 357
+    },
+    {
+      "gen": 20,
+      "gen_best_fitness": 85.6957118768817,
+      "overall_best_fitness": 85.6957118768817,
+      "best_angles": [
+        3,
+        15,
+        21,
+        24,
+        39,
+        45,
+        48
+      ],
+      "unique_solves": 372
+    },
+    {
+      "gen": 21,
+      "gen_best_fitness": 85.6957118768817,
+      "overall_best_fitness": 85.6957118768817,
+      "best_angles": [
+        3,
+        15,
+        21,
+        24,
+        39,
+        45,
+        48
+      ],
+      "unique_solves": 389
+    },
+    {
+      "gen": 22,
+      "gen_best_fitness": 85.6957118768817,
+      "overall_best_fitness": 85.6957118768817,
+      "best_angles": [
+        3,
+        15,
+        21,
+        24,
+        39,
+        45,
+        48
+      ],
+      "unique_solves": 408
+    },
+    {
+      "gen": 23,
+      "gen_best_fitness": 85.6957118768817,
+      "overall_best_fitness": 85.6957118768817,
+      "best_angles": [
+        3,
+        15,
+        21,
+        24,
+        39,
+        45,
+        48
+      ],
+      "unique_solves": 427
+    },
+    {
+      "gen": 24,
+      "gen_best_fitness": 85.6957118768817,
+      "overall_best_fitness": 85.6957118768817,
+      "best_angles": [
+        3,
+        15,
+        21,
+        24,
+        39,
+        45,
+        48
+      ],
+      "unique_solves": 446
+    },
+    {
+      "gen": 25,
+      "gen_best_fitness": 85.6957118768817,
+      "overall_best_fitness": 85.6957118768817,
+      "best_angles": [
+        3,
+        15,
+        21,
+        24,
+        39,
+        45,
+        48
+      ],
+      "unique_solves": 464
+    },
+    {
+      "gen": 26,
+      "gen_best_fitness": 85.6957118768817,
+      "overall_best_fitness": 85.6957118768817,
+      "best_angles": [
+        3,
+        15,
+        21,
+        24,
+        39,
+        45,
+        48
+      ],
+      "unique_solves": 480
+    },
+    {
+      "gen": 27,
+      "gen_best_fitness": 85.6957118768817,
+      "overall_best_fitness": 85.6957118768817,
+      "best_angles": [
+        3,
+        15,
+        21,
+        24,
+        39,
+        45,
+        48
+      ],
+      "unique_solves": 496
+    },
+    {
+      "gen": 28,
+      "gen_best_fitness": 85.6957118768817,
+      "overall_best_fitness": 85.6957118768817,
+      "best_angles": [
+        3,
+        15,
+        21,
+        24,
+        39,
+        45,
+        48
+      ],
+      "unique_solves": 513
+    },
+    {
+      "gen": 29,
+      "gen_best_fitness": 85.6957118768817,
+      "overall_best_fitness": 85.6957118768817,
+      "best_angles": [
+        3,
+        15,
+        21,
+        24,
+        39,
+        45,
+        48
+      ],
+      "unique_solves": 528
+    },
+    {
+      "gen": 30,
+      "gen_best_fitness": 85.6957118768817,
+      "overall_best_fitness": 85.6957118768817,
+      "best_angles": [
+        3,
+        15,
+        21,
+        24,
+        39,
+        45,
+        48
+      ],
+      "unique_solves": 544
+    },
+    {
+      "gen": 31,
+      "gen_best_fitness": 85.6957118768817,
+      "overall_best_fitness": 85.6957118768817,
+      "best_angles": [
+        3,
+        15,
+        21,
+        24,
+        39,
+        45,
+        48
+      ],
+      "unique_solves": 561
+    },
+    {
+      "gen": 32,
+      "gen_best_fitness": 85.6957118768817,
+      "overall_best_fitness": 85.6957118768817,
+      "best_angles": [
+        3,
+        15,
+        21,
+        24,
+        39,
+        45,
+        48
+      ],
+      "unique_solves": 578
+    },
+    {
+      "gen": 33,
+      "gen_best_fitness": 85.6957118768817,
+      "overall_best_fitness": 85.6957118768817,
+      "best_angles": [
+        3,
+        15,
+        21,
+        24,
+        39,
+        45,
+        48
+      ],
+      "unique_solves": 596
+    },
+    {
+      "gen": 34,
+      "gen_best_fitness": 85.6957118768817,
+      "overall_best_fitness": 85.6957118768817,
+      "best_angles": [
+        3,
+        15,
+        21,
+        24,
+        39,
+        45,
+        48
+      ],
+      "unique_solves": 613
+    },
+    {
+      "gen": 35,
+      "gen_best_fitness": 85.6957118768817,
+      "overall_best_fitness": 85.6957118768817,
+      "best_angles": [
+        3,
+        15,
+        21,
+        24,
+        39,
+        45,
+        48
+      ],
+      "unique_solves": 630
+    },
+    {
+      "gen": 36,
+      "gen_best_fitness": 85.6957118768817,
+      "overall_best_fitness": 85.6957118768817,
+      "best_angles": [
+        3,
+        15,
+        21,
+        24,
+        39,
+        45,
+        48
+      ],
+      "unique_solves": 647
+    },
+    {
+      "gen": 37,
+      "gen_best_fitness": 85.6957118768817,
+      "overall_best_fitness": 85.6957118768817,
+      "best_angles": [
+        3,
+        15,
+        21,
+        24,
+        39,
+        45,
+        48
+      ],
+      "unique_solves": 665
+    },
+    {
+      "gen": 38,
+      "gen_best_fitness": 85.6957118768817,
+      "overall_best_fitness": 85.6957118768817,
+      "best_angles": [
+        3,
+        15,
+        21,
+        24,
+        39,
+        45,
+        48
+      ],
+      "unique_solves": 681
+    },
+    {
+      "gen": 39,
+      "gen_best_fitness": 85.6957118768817,
+      "overall_best_fitness": 85.6957118768817,
+      "best_angles": [
+        3,
+        15,
+        21,
+        24,
+        39,
+        45,
+        48
+      ],
+      "unique_solves": 693
+    }
+  ]
+}

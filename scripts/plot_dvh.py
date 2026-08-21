@@ -25,9 +25,13 @@ matrix load), so the curves are cached to an .npz. Re-plotting is free:
 """
 import argparse
 import json
+import sys
 import textwrap
 import time
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from beam_angles import fetch_angle_map, format_angles
 
 import numpy as np
 import matplotlib
@@ -37,6 +41,10 @@ from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib.lines import Line2D
 
 import portpy.photon as pp
+
+# beam_id -> real gantry angle for the patient being plotted; filled in by main().
+# Never derive an angle from the ID: that arithmetic is wrong from Lung_Patient_11 on.
+ANGLES: dict[int, float] = {}
 
 if __package__:
     from .metric_ranking import select_best_plans
@@ -97,14 +105,31 @@ def solve_set(data_dir, patient, beams, downsample):
     return plan, sol, dose_1d, float(prob.value)
 
 
+def recorded_structs(cache):
+    """Structures actually present for this patient, falling back to all of them
+    for caches written before the omission was recorded."""
+    names = cache.get("structs") if hasattr(cache, "get") else None
+    return [str(x) for x in names] if names is not None else list(STRUCTS)
+
+
 def collect(data_dir, patient, downsample, cache_path, beam_sets):
     out = {}
     for name in PLANS:
         beams = beam_sets[name]
-        print(f"\n=== {name}: beams {beams} ({[b * 5 for b in beams]} deg) ===", flush=True)
+        print(f"\n=== {name}: beams {beams} "
+              f"({format_angles(ANGLES, beams)}) ===", flush=True)
         t0 = time.time()
         plan, sol, dose_1d, obj = solve_set(data_dir, patient, beams, downsample)
-        for s in STRUCTS:
+        # Not every patient contours every organ: Lung_Patient_8 has no HEART, and the
+        # plot used to die on it after the GA and both comparisons had already succeeded.
+        # A missing organ is a fact about the patient, so it is skipped and recorded.
+        present = [s for s in STRUCTS if s in plan.inf_matrix.opt_voxels_dict["name"]]
+        missing = [s for s in STRUCTS if s not in present]
+        if missing:
+            print(f"[note] {patient} has no {', '.join(missing)}; omitted from the DVH",
+                  flush=True)
+        out["structs"] = np.asarray(present)
+        for s in present:
             x, y = pp.Evaluation.get_dvh(sol, struct=s, dose_1d=dose_1d)
             out[f"{name}|{s}|x"] = np.asarray(x, dtype=float)
             out[f"{name}|{s}|y"] = np.asarray(y, dtype=float) * 100.0
@@ -251,7 +276,7 @@ def style_axes(ax, xmax):
 def page_overlay(pdf, C, xmax, patient, downsampled):
     fig, ax = plt.subplots(figsize=(10.5, 6.2))
     comparison_plan = PLANS[-1]
-    for s in OVERLAY_STRUCTS:
+    for s in [x for x in OVERLAY_STRUCTS if x in recorded_structs(C)]:
         for name in ("expert", comparison_plan):
             ax.plot(C[f"{name}|{s}|x"], C[f"{name}|{s}|y"],
                     color=COLORS[s], linestyle=PLAN_STYLE[name],
@@ -261,7 +286,7 @@ def page_overlay(pdf, C, xmax, patient, downsampled):
     ax.set_ylabel("Fractional volume (%)", fontsize=9.5, color=INK)
 
     struct_keys = [Line2D([], [], color=COLORS[s], lw=2.2, label=NICE[s])
-                   for s in OVERLAY_STRUCTS]
+                   for s in [x for x in OVERLAY_STRUCTS if x in recorded_structs(C)]]
     plan_keys = [Line2D([], [], color=MUTED, lw=2.2, linestyle=PLAN_STYLE[n],
                         label=PLAN_LABEL[n]) for n in ("expert", comparison_plan)]
     # both legends outside the axes: inside, they collide with the PTV shoulder
@@ -334,9 +359,10 @@ def annotate_panel(ax, criteria, raw, struct):
 
 
 def page_panels(pdf, C, xmax, patient, downsampled, criteria, raw):
+    present = [x for x in STRUCTS if x in recorded_structs(C)]
     fig, axes = plt.subplots(2, 3, figsize=(11, 7.2), sharex=True, sharey=True)
     flat = axes.ravel()
-    for ax, s in zip(flat, STRUCTS):
+    for ax, s in zip(flat, present):
         for name in PLANS:
             ax.plot(C[f"{name}|{s}|x"], C[f"{name}|{s}|y"],
                     color=COLORS[s], linestyle=PLAN_STYLE[name], linewidth=1.8)
@@ -344,8 +370,11 @@ def page_panels(pdf, C, xmax, patient, downsampled, criteria, raw):
         ax.set_title(NICE[s], loc="left", fontsize=10, color=INK, fontweight="bold", pad=6)
         annotate_panel(ax, criteria, raw, s)
 
-    legend_ax = flat[len(STRUCTS)]
+    legend_ax = flat[len(present)]
     legend_ax.axis("off")
+    # Any slot past the legend belongs to an organ this patient does not have.
+    for ax in flat[len(present) + 1:]:
+        ax.axis("off")
     keys = [Line2D([], [], color=MUTED, lw=2.2, linestyle=PLAN_STYLE[n], label=PLAN_LABEL[n])
             for n in PLANS]
     legend_ax.legend(handles=keys, loc="center left", frameon=False, fontsize=9,
@@ -356,7 +385,7 @@ def page_panels(pdf, C, xmax, patient, downsampled, criteria, raw):
     # sharex hides tick labels on the top row, but the legend occupies the slot under the
     # last top-row panel — so that panel has to carry its own axis
     ncol = axes.shape[1]
-    exposed = [flat[i] for i in range(len(STRUCTS)) if i + ncol >= len(STRUCTS)]
+    exposed = [flat[i] for i in range(len(present)) if i + ncol >= len(present)]
     for ax in exposed:
         ax.set_xlabel("Dose (Gy)", fontsize=9, color=INK)
         ax.tick_params(labelbottom=True)
@@ -452,7 +481,7 @@ def page_table(pdf, criteria, raw, patient, downsampled, criteria_path):
     head = "Beam angles (gantry°)"
     beams = "\n".join(
         f"{head if i == 0 else '':<{len(head)}s}   {HEAD[n][0]:<10s} "
-        f"{', '.join(str(int(b) * 5) for b in raw[n]['beams'])}"
+        f"{format_angles(ANGLES, raw[n]['beams'])}"
         for i, n in enumerate(PLANS))
     fig.text(label_x, 0.135, beams, fontsize=7.5, color=MUTED, va="top",
              linespacing=1.65, family="monospace")
@@ -487,6 +516,9 @@ def main():
     ap.add_argument("--out", default=None)
     args = ap.parse_args()
 
+    global ANGLES
+    ANGLES = fetch_angle_map(args.patient, args.data_dir)
+
     patient_results = Path("results") / args.patient
     resolution = "downsampled" if args.downsample else "full_resolution"
     if args.cache is None:
@@ -519,7 +551,7 @@ def main():
               "could not be cross-checked against the curves.")
 
     downsampled = bool(C["downsampled"][0])
-    xmax = max(float(C[f"{n}|{s}|x"][-1]) for n in PLANS for s in STRUCTS)
+    xmax = max(float(C[f"{n}|{s}|x"][-1]) for n in PLANS for s in recorded_structs(C))
     xmax = 5 * np.ceil(xmax / 5)
 
     with PdfPages(args.out) as pdf:

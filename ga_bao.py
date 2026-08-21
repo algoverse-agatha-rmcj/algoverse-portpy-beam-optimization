@@ -52,11 +52,16 @@ import argparse
 import json
 import math
 import random
+import statistics
+import sys
 import time
 from pathlib import Path
 
 import numpy as np
 import portpy.photon as pp
+
+sys.path.insert(0, str(Path(__file__).resolve().parent / "scripts"))
+from beam_angles import excluded_ids, fetch_angle_map, format_angles, grid_pool
 
 from scripts.json_io import atomic_write_json, read_json
 
@@ -115,6 +120,10 @@ class BAOProblem:
                                                 bd["end_beamlet_idx"])
 
         self._cache = {}   # frozenset(beam_ids) -> score, so we never re-solve a set
+        # frozenset(beam_ids) -> seconds for the MOSEK solve alone. Kept separate from
+        # _cache so the fitness path is unchanged, and persisted with the cache so a
+        # resumed run does not silently report timings for only the portion it ran.
+        self._solve_seconds = {}
 
     def evaluate(self, beam_ids):
         """FITNESS SEAM: beam angles in -> optimization objective out (lower=better)."""
@@ -132,6 +141,7 @@ class BAOProblem:
             if beam_id not in key:
                 opt.constraints += [x[start:end] == 0]
 
+        started = time.perf_counter()
         try:
             _, prob = opt.solve(solver="MOSEK", verbose=False, return_cvxpy_prob=True)
             val = prob.value
@@ -139,8 +149,30 @@ class BAOProblem:
         except Exception as exc:  # a single bad beam set must not kill the whole run
             print(f"[warn] solve failed for beams {sorted(key)}: {type(exc).__name__}: {exc}")
             score = FAILED_SOLVE_SCORE
+        self._solve_seconds[key] = time.perf_counter() - started
         self._cache[key] = score
         return score
+
+    @property
+    def solve_time_stats(self):
+        """Per-solve wall time, summarized.
+
+        Both statistics the team disagreed about are reported rather than one:
+        the mean, and the median that a single stalled solve cannot distort.
+        `max` makes such a stall visible instead of leaving it inferred.
+        """
+        times = sorted(self._solve_seconds.values())
+        if not times:
+            return None
+        return {
+            "measured_solves": len(times),
+            "mean_s": round(sum(times) / len(times), 3),
+            "median_s": round(statistics.median(times), 3),
+            "p95_s": round(times[min(len(times) - 1, int(0.95 * len(times)))], 3),
+            "min_s": round(times[0], 3),
+            "max_s": round(times[-1], 3),
+            "total_s": round(sum(times), 1),
+        }
 
     @property
     def num_solves(self):
@@ -148,7 +180,11 @@ class BAOProblem:
 
     def save_cache(self, path):
         """Persist the solve cache so a crashed/interrupted run can resume for free."""
-        data = [{"beams": sorted(bs), "score": sc} for bs, sc in self._cache.items()]
+        data = [
+            {"beams": sorted(bs), "score": sc,
+             **({"seconds": round(self._solve_seconds[bs], 4)} if bs in self._solve_seconds else {})}
+            for bs, sc in self._cache.items()
+        ]
         atomic_write_json(path, data)
 
     def load_cache(self, path):
@@ -160,7 +196,10 @@ class BAOProblem:
                 print(f"[checkpoint] ignored incomplete cache {p.name}")
                 return
             for item in cached:
-                self._cache[frozenset(item["beams"])] = item["score"]
+                key = frozenset(item["beams"])
+                self._cache[key] = item["score"]
+                if "seconds" in item:
+                    self._solve_seconds[key] = item["seconds"]
             print(f"[checkpoint] loaded {len(self._cache)} cached solves from {p.name}")
 
 
@@ -251,8 +290,7 @@ def main():
     ap.add_argument("--data-dir", default=r"../data",
                     help="Path to the PortPy data folder (default: ../data, sibling of the repo).")
     ap.add_argument("--patient", default="Lung_Patient_3")
-    ap.add_argument("--pool", type=int, nargs="+",
-                    default=[b for b in range(0, 72, 3) if b != 36],
+    ap.add_argument("--pool", type=int, nargs="+", default=None,
                     help="Candidate beam_ids to search over (default: every 15 degrees, "
                          "excluding 180 degrees; needs --beam-mode ga data).")
     ap.add_argument("--k", type=int, default=7, help="Number of beams to select.")
@@ -281,21 +319,36 @@ def main():
         )
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
 
+    # Beam IDs stop encoding the gantry angle at Lung_Patient_11, so both the pool
+    # and the 180-degree exclusion are resolved from each beam's real angle rather
+    # than from arithmetic on the ID. See scripts/beam_angles.py for the evidence.
+    angles = fetch_angle_map(args.patient, args.data_dir)
+    if not angles:
+        raise SystemExit(f"no beam metadata for {args.patient}; download the patient first")
+    dropped = excluded_ids(angles)
+    if args.pool is None:
+        args.pool = grid_pool(angles)
+        grid = sorted(angles[b] for b in args.pool)
+        print(f"[pool] {len(args.pool)} beams from real gantry angles "
+              f"({grid[0]:g}-{grid[-1]:g} deg, 180 excluded)")
+
     # The planner (expert) beams must be reachable from the pool, otherwise a
-    # GA-vs-expert comparison is rigged: on Lung_Patient_2 the expert uses beam 37
-    # (185 deg), which a 15-deg grid like range(0,72,3) cannot represent.
+    # GA-vs-expert comparison is rigged: on Lung_Patient_2 the expert uses a 185-deg
+    # beam, which a 15-deg grid cannot represent.
     planner = json.loads(
         (Path(args.data_dir) / args.patient / "PlannerBeams.json").read_text())["IDs"]
     # Keep 180 degrees excluded even if a patient planner happens to use it. The
     # clinician plan is still scored exactly as delivered by PortPy; this guard only
     # prevents the GA from exploiting a couch-free 180-degree beam in simulation.
-    missing = sorted((set(planner) - {36}) - set(args.pool))
+    missing = sorted((set(map(int, planner)) - dropped) - set(args.pool))
     if missing:
         args.pool = sorted(set(args.pool) | set(missing))
-        print(f"[pool] added expert beams {missing}; pool is now {len(args.pool)} beams")
-    if 36 in args.pool:
-        raise SystemExit("candidate pool contains beam 36 (180 degrees); remove it for "
-                         "the couch-aware comparison protocol")
+        print(f"[pool] added expert beams {missing} "
+              f"({format_angles(angles, missing)}); pool is now {len(args.pool)} beams")
+    overlap = sorted(dropped & set(args.pool))
+    if overlap:
+        raise SystemExit(f"candidate pool contains beam(s) {overlap} at 180 degrees; "
+                         "remove them for the couch-aware comparison protocol")
 
     if args.checkpoint:
         ckpt = args.checkpoint
@@ -317,8 +370,16 @@ def main():
             "pop": args.pop, "gens": args.gens, "mutation_rate": args.mutation_rate,
             "seed": args.seed,
             "best_angles": list(best), "best_fitness": best_fit,
+            # Real gantry angles, recorded alongside the IDs so downstream readers
+            # never have to guess the ID->angle convention for this patient.
+            "pool_gantry_deg": [angles[b] for b in args.pool],
+            "best_gantry_deg": [angles[b] for b in best],
             "unique_solves": problem.num_solves,
+            # wall_time_s covers only the portion of the GA this process ran, so on a
+            # resumed run it is NOT comparable to unique_solves. solve_time_s is, because
+            # each entry is measured per solve and travels with the checkpoint cache.
             "wall_time_s": round(time.time() - t0, 1),
+            "solve_time_s": problem.solve_time_stats,
             "history": history,
         })
 
@@ -333,6 +394,11 @@ def main():
     print(f"best fitness         : {best_fit:.4f}")
     print(f"unique MOSEK solves  : {problem.num_solves}  (of {args.pop * args.gens} evaluations)")
     print(f"wall time            : {time.time() - t0:.0f}s")
+    stats = problem.solve_time_stats
+    if stats:
+        print(f"solve time (measured): n={stats['measured_solves']}  "
+              f"mean {stats['mean_s']}s  median {stats['median_s']}s  "
+              f"p95 {stats['p95_s']}s  max {stats['max_s']}s")
     print(f"saved -> {args.out}  (cache: {ckpt})")
 
 

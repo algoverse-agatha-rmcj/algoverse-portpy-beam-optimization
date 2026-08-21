@@ -14,8 +14,12 @@ is far cheaper in memory.
 """
 import argparse
 import json
+import sys
 import time
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from beam_angles import excluded_ids, fetch_angle_map
 
 import portpy.photon as pp
 
@@ -110,9 +114,12 @@ def main():
             f"expected {args.patient!r}"
         )
     ga_beams = [int(b) for b in ga_result["best_angles"]]
-    if 36 in ga_beams:
+    # Checked by real gantry angle: beam 36 is 180 degrees only on patients 2-10.
+    at_180 = sorted(excluded_ids(fetch_angle_map(args.patient, args.data_dir))
+                    .intersection(ga_beams))
+    if at_180:
         raise SystemExit(
-            f"{ga_result_path}: GA winner contains beam 36 (180 degrees); "
+            f"{ga_result_path}: GA winner contains beam(s) {at_180} at 180 degrees; "
             "use the no-180 run"
         )
 
