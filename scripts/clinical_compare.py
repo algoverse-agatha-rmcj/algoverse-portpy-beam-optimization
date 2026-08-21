@@ -19,6 +19,11 @@ from pathlib import Path
 
 import portpy.photon as pp
 
+if __package__:
+    from .json_io import atomic_write_json
+else:
+    from json_io import atomic_write_json
+
 PROTOCOL = "Lung_2Gy_30Fx"
 
 
@@ -80,7 +85,7 @@ def criteria_table(cc, sol, dose_1d):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--data-dir", default="../data")
-    ap.add_argument("--patient", default="Lung_Patient_2")
+    ap.add_argument("--patient", required=True, help="PortPy patient ID, e.g. Lung_Patient_3")
     ap.add_argument(
         "--ga-result",
         default=None,
@@ -144,7 +149,7 @@ def main():
             results[name]["source_ga_result"] = str(ga_result_path)
         print(f"objective {obj:.4f} | PTV D95 {ptv_d95:.2f} Gy | "
               f"A {shape} | {time.time()-t0:.0f}s", flush=True)
-        Path(args.out).write_text(json.dumps(results, indent=2))
+        atomic_write_json(args.out, results)
 
     # summary
     print("\n\n================ CLINICAL CRITERIA ================")

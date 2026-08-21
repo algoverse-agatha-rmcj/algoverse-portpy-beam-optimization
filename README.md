@@ -1,14 +1,24 @@
 # Algoverse: Beam-Angle Optimization on PortPy
 
 Algoverse AI Research Fellowship project. We're extending prior linear-programming-based
-radiotherapy beam-angle optimization by testing alternative optimization techniques
-(genetic algorithm, simulated annealing, memetic algorithm) on the open-source
-[PortPy](https://github.com/PortPy-Project/PortPy) prostate-cancer benchmark dataset.
+radiotherapy beam-angle optimization by testing a genetic algorithm on open-source
+[PortPy](https://github.com/PortPy-Project/PortPy) lung-cancer benchmark cases.
 
 ## Results
 
 Experiment outputs are organized by patient under [`results/`](results/). Each completed
 patient bundle keeps the GA result JSON, clinician comparison metrics, and its
-dose-volume histogram (DVH) together. The current complete bundle is
-[`Lung_Patient_2`](results/Lung_Patient_2/).
+dose-volume histogram (DVH) together. Complete seed-0 bundles are committed for
+[`Lung_Patient_2` through `Lung_Patient_6`](results/).
 
+## Project status
+
+The current implementation and research backlog are tracked in
+[`docs/project_status.md`](docs/project_status.md). Simulated annealing and other heuristic
+extensions are deferred until the GA implementation, repeat-seed study, and compute
+comparison are complete.
+
+## Contributing
+
+Use a branch and pull request for every change; do not commit raw PortPy patient data or
+derived caches. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the lightweight checks.

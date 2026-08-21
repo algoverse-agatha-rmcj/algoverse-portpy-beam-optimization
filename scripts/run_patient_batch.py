@@ -7,13 +7,16 @@ solves also resume from the ignored per-patient cache written by ga_bao.py.
 from __future__ import annotations
 
 import argparse
-import json
 import re
 import shutil
 import subprocess
-import sys
 import time
 from pathlib import Path
+
+if __package__:
+    from .json_io import read_json
+else:
+    from json_io import read_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -28,8 +31,15 @@ def run(*args: str) -> None:
     subprocess.run(command, cwd=ROOT, check=True)
 
 
-def load_json(path: Path) -> dict:
-    return json.loads(path.read_text())
+def load_json(path: Path) -> dict | None:
+    payload = read_json(path)
+    return payload if isinstance(payload, dict) else None
+
+
+def require_keys(payload: dict, required: set[str], label: str) -> None:
+    missing = required - set(payload)
+    if missing:
+        raise RuntimeError(f"{label}: missing required keys {sorted(missing)}")
 
 
 def paths(patient: str) -> dict[str, Path]:
@@ -49,12 +59,20 @@ def ga_complete(path: Path) -> bool:
     if not path.exists():
         return False
     data = load_json(path)
+    if data is None:
+        return False
+    history = data.get("history")
+    pool = data.get("pool")
+    best_angles = data.get("best_angles")
     return (
         data.get("patient") in {f"Lung_Patient_{i}" for i in range(3, 7)}
         and data.get("gens") == 40
-        and len(data.get("history", [])) == 40
-        and 36 not in data.get("pool", [])
-        and 36 not in data.get("best_angles", [])
+        and isinstance(history, list)
+        and len(history) == 40
+        and isinstance(pool, list)
+        and 36 not in pool
+        and isinstance(best_angles, list)
+        and 36 not in best_angles
     )
 
 
@@ -67,7 +85,7 @@ def wait_for_external_ga(path: Path) -> bool:
         if age > 120:
             print(f"GA checkpoint stale for {age:.0f}s; resuming it here", flush=True)
             return False
-        data = load_json(path)
+        data = load_json(path) or {}
         print(
             f"waiting for active GA: generation {len(data.get('history', []))}/40, "
             f"{data.get('unique_solves', 0)} solves",
@@ -81,10 +99,14 @@ def comparison_complete(path: Path, downsampled: bool) -> bool:
     if not path.exists():
         return False
     data = load_json(path)
+    if data is None:
+        return False
     return (
-        list(data) == ["expert", "GA"]
+        set(data) == {"expert", "GA"}
+        and all(isinstance(row, dict) for row in data.values())
         and {row.get("downsampled") for row in data.values()} == {downsampled}
-        and all(len(row.get("criteria", [])) >= 10 for row in data.values())
+        and all(isinstance(row.get("criteria"), list)
+                and len(row["criteria"]) >= 10 for row in data.values())
     )
 
 
@@ -93,7 +115,10 @@ def data_complete(patient: str) -> bool:
     planner_path = data_dir / "PlannerBeams.json"
     if not planner_path.exists():
         return False
-    planner = {int(x) for x in load_json(planner_path)["IDs"]}
+    planner_payload = load_json(planner_path)
+    if planner_payload is None or not isinstance(planner_payload.get("IDs"), list):
+        return False
+    planner = {int(x) for x in planner_payload["IDs"]}
     expected = ({b for b in range(0, 72, 3) if b != 36} | (planner - {36}))
     present = {
         int(path.name.split("_")[1])
@@ -104,13 +129,28 @@ def data_complete(patient: str) -> bool:
 
 def validate_bundle(patient: str, p: dict[str, Path]) -> None:
     ga = load_json(p["ga"])
+    if ga is None:
+        raise RuntimeError(f"{patient}: missing or unreadable GA result")
+    require_keys(ga, {"patient", "best_angles", "pool"}, f"{patient}: GA result")
+    if not isinstance(ga["best_angles"], list) or not isinstance(ga["pool"], list):
+        raise RuntimeError(f"{patient}: GA angles and pool must be lists")
     if ga.get("patient") != patient or 36 in ga["best_angles"] or 36 in ga["pool"]:
         raise RuntimeError(f"{patient}: invalid GA patient or 180-degree beam")
 
     for key, expected_ds in (("down", True), ("full", False)):
         comparison = load_json(p[key])
-        if list(comparison) != ["expert", "GA"]:
+        if comparison is None:
+            raise RuntimeError(f"{patient}: missing or unreadable {key} comparison")
+        if set(comparison) != {"expert", "GA"}:
             raise RuntimeError(f"{patient}: {key} comparison does not contain clinician + GA")
+        for name in ("expert", "GA"):
+            if not isinstance(comparison[name], dict):
+                raise RuntimeError(f"{patient}: {key} {name} entry must be an object")
+            require_keys(
+                comparison[name],
+                {"beams", "downsampled", "criteria"},
+                f"{patient}: {key} {name}",
+            )
         if comparison["GA"]["beams"] != ga["best_angles"]:
             raise RuntimeError(f"{patient}: {key} comparison uses a different GA winner")
         if {row["downsampled"] for row in comparison.values()} != {expected_ds}:
@@ -124,6 +164,8 @@ def write_readme(patient: str, p: dict[str, Path]) -> None:
     ga = load_json(p["ga"])
     down = load_json(p["down"])
     full = load_json(p["full"])
+    if ga is None or down is None or full is None:
+        raise RuntimeError(f"{patient}: cannot write README from incomplete JSON")
 
     def improvement(data: dict) -> float:
         return 100 * (data["expert"]["objective"] - data["GA"]["objective"]) / data["expert"]["objective"]

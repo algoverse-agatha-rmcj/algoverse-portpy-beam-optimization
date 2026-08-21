@@ -1,6 +1,6 @@
 # Lung_Patient_2 — GA vs. clinician, first end-to-end comparison
 
-Milen, 2026-07-29. Branch `milen/patient2-expert-pool`. All runs on a 36 GB machine.
+Milen, 2026-07-29. Branch `milen/patient2-expert-pool`. All runs on a Mac.
 
 ## Folder contents
 
@@ -94,7 +94,7 @@ both flipped direction between the down-sampled and full-resolution tables. Sear
 down-sampled; **evaluate at full resolution, always.**
 
 Full resolution is also much cheaper than assumed: **42 s/solve**, matrix 386,585 × 6,004,
-comfortable in 36 GB. A complete 720-solve GA at native resolution is ~8 h — an overnight
+and it fits comfortably in memory on a Mac. A complete 720-solve GA at native resolution is ~8 h — an overnight
 job. The team may not need down-sampling at all for single-patient work.
 
 ## Clinical criteria — full resolution (the numbers that matter)
@@ -179,7 +179,7 @@ python3.11 -m venv ../portpy-venv
 
 - One patient, one seed, no error bars. Needs repeat seeds before any claim is firm.
 - Run B had not converged at 40 generations.
-- Lung_Patient_3 has no expert baseline; nobody has scored `[0, 6, 12, 18, 24, 30, 35]`,
-  so Jordan's 82.817 has nothing to measure against. Needs the Patient 3 download.
+- Patients 3–6 now have matching clinician comparisons and DVHs; cross-patient claims still
+  need repeat seeds and an aggregate analysis.
 - Run A converged at gen 24 and burned 268 solves (~30 min) for nothing. Early stopping
   would roughly halve runtime.

@@ -87,13 +87,13 @@ Confirm with `dir ga_bao.py` — it should list the file, and the prompt should 
 ## Step 3 — run the genetic algorithm
 Full real run (population 20, 40 generations, 24-angle pool, pick 7 beams):
 ```powershell
-C:\Users\jpwun\anaconda3\envs\portpy\python.exe ga_bao.py --patient Lung_Patient_3 --pool 0 3 6 9 12 15 18 21 24 27 30 33 36 39 42 45 48 51 54 57 60 63 66 69 --k 7 --pop 20 --gens 40
+C:\Users\jpwun\anaconda3\envs\portpy\python.exe ga_bao.py --patient Lung_Patient_3 --k 7 --pop 20 --gens 40
 ```
 Using the full path to `python.exe` guarantees the correct environment, so you don't need `conda activate` first.
 
 Quick 2-minute sanity check (smaller config) before the long run:
 ```powershell
-C:\Users\jpwun\anaconda3\envs\portpy\python.exe ga_bao.py --patient Lung_Patient_3 --pool 0 6 12 18 24 30 36 42 48 54 60 66 --k 5 --pop 6 --gens 3
+C:\Users\jpwun\anaconda3\envs\portpy\python.exe ga_bao.py --patient Lung_Patient_3 --k 5 --pop 6 --gens 3
 ```
 
 ## What you will see

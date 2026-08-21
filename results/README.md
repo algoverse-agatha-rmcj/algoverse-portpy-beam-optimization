@@ -27,6 +27,11 @@ The PDF is a dose-volume histogram, not a conventional frequency histogram. The 
 version has three pages: an overlay, per-structure curves annotated with protocol metrics,
 and the complete clinical-criteria table.
 
-`Lung_Patient_2` is the first complete bundle. `Lung_Patient_3` currently contains only a
-legacy GA run; it predates the corrected candidate pool and has no clinician comparison or
-matching DVH, so it must not be used as comparative evidence.
+Complete, comparable bundles are committed for `Lung_Patient_2` through
+`Lung_Patient_6`. Patients 2 and 3 also retain clearly named legacy GA runs for historical
+context; those legacy files are not comparative evidence. The current seed-0 result,
+full-resolution comparison, and matching PDF are the authoritative artifacts in each folder.
+
+The committed PDFs were generated before the 2026-08-12 target-ranking correction. Their
+numeric values and curves remain valid, but PTV bold emphasis must be regenerated from the
+ignored curve caches after this fix reaches the machine that produced them.

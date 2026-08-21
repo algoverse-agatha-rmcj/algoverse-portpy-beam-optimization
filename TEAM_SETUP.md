@@ -82,7 +82,7 @@ pip install "numpy==2.4.6"      # re-pin: patchify tries to downgrade numpy, whi
 
 - `portpy[mosek,data]` = PortPy core (NumPy/SciPy/CVXPy/Matplotlib/pandas/h5py) **+ MOSEK + the HuggingFace downloader (`huggingface_hub`) + pydicom**.
 - We deliberately **avoid `portpy[all]`** — it pulls the full PyTorch/deep-learning stack (~2+ GB) that the BAO work doesn't need. (Only add it if you plan to run the AI dose-prediction notebooks.)
-- **`patchify`** is required to down-sample the influence matrix (used by both the GA and the MILP benchmark); it isn't in `[mosek,data]`. ⚠️ Installing it downgrades numpy to <2, which breaks cvxpy — so we immediately re-pin `numpy==2.4.6` (patchify still works fine with numpy 2). pip may print a harmless dependency-conflict warning; ignore it.
+- **`patchify`** is required to down-sample the influence matrix used by the GA; it isn't in `[mosek,data]`. ⚠️ Installing it downgrades numpy to <2, which breaks cvxpy — so we immediately re-pin `numpy==2.4.6` (patchify still works fine with numpy 2). pip may print a harmless dependency-conflict warning; ignore it.
 - `jupyter ipykernel` = needed to run notebooks and register the kernel (step 4).
 
 Sanity check:
@@ -139,8 +139,8 @@ git checkout -b research-v1.1.4 v1.1.4
 
 PortPy v1.1.4's down-sampler crashes on the current dataset format
 (`TypeError: only 0-dimensional arrays can be converted to Python scalars`).
-Down-sampling is required for the beam-angle-optimization benchmark (both the GA
-and the MILP), so apply our one-line patch to the installed package. It's
+Down-sampling is required for the current genetic-algorithm search, so apply our
+one-line patch to the installed package. It's
 idempotent and makes a `.orig_backup`:
 
 ```bash
