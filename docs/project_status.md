@@ -1,10 +1,12 @@
 # Project status and unfinished work
 
-Updated 2026-08-18. This is the repository backlog; meeting transcripts and Slack determine
+Updated 2026-08-21. This is the repository backlog; meeting transcripts and Slack determine
 individual ownership.
 
 ## Completed
 
+- The ASCI abstract registration was submitted; the full paper is now the deadline-driving
+  deliverable.
 - The no-180 genetic algorithm runs end to end and checkpoints after every generation.
 - Patients 2–6 have committed seed-0 GA results, full-resolution clinician comparisons,
   and three-page DVH reports.
@@ -17,21 +19,33 @@ individual ownership.
   angles from Patient 11 onward. See the README section "Beam IDs do not encode gantry
   angles"; guarded by `tests/test_beam_angles.py`.
 - The pipeline accepts any patient in the catalogue, not only Patients 3-6.
+- The matched seed-0 cohort now contains 17 usable patients (Patients 2-11 and 14-20),
+  with Patients 12 and 13 excluded for documented upstream data defects.
+- `scripts/analyze_cohort.py` regenerates the cohort evidence from the authoritative
+  full-resolution comparisons using arithmetic means and explicit outlier disclosure.
+- `scripts/generate_paper_assets.py` regenerates the manuscript cohort table and vector
+  per-patient objective figure from the same summary.
+- Patient 11's timing discrepancy is resolved: it resumed with 653 cached solves, so its
+  456-second wall time is a process segment and is excluded from the 16-patient full-run mean.
 
 ## Active priorities
 
-1. Have a second team member review the GA, clinical-comparison, and reporting logic in depth.
-2. Regenerate the Patients 2–6 PDFs from their cached curves so the committed figures use
-   the corrected target-versus-organ emphasis rule. No clinical solve needs to be repeated.
-3. Repeat the GA across several seeds and report variability; one seed is not evidence of
+1. Copy the drafted Results, Discussion, Limitations, cohort table, and objective figure into
+   the shared paper, then send that draft to Ruizhe for the review promised on the PI call.
+2. Get clinical review of the target-dose language, left-lung maximum, Patient 8 violation,
+   and Patients 14/17 using `docs/clinical_review_checklist.md`.
+3. Export objective terms on future full-resolution comparisons so the team can distinguish
+   target-coverage gains from organ-at-risk penalties instead of inferring from total score.
+4. Have a second team member review the GA, clinical-comparison, aggregation, and reporting
+   logic in depth.
+5. Repeat the GA across several seeds and report variability; one seed is not evidence of
    convergence or robustness.
-4. Define a fair compute benchmark. PortPy 1.1.4 does not ship the assumed exact MILP
-   beam-angle optimizer, so document a reproducible baseline before claiming speedup.
-5. Add end-to-end compute measurements beyond per-solve time, including total wall time and
-   the hardware/environment used.
-6. Aggregate the patient results: win/loss rate versus clinician angles, target coverage,
-   organ-at-risk tradeoffs, and patient-to-patient consistency.
-7. Obtain approved compute before scaling much beyond the committed patients. The cohort
+6. Define a fair compute benchmark before claiming speedup. A same-budget random search is
+   immediately feasible; PortPy 1.1.4 does not ship the assumed exact MILP beam-angle
+   optimizer, and the PI call placed MILP after the core paper work if time remains.
+7. Regenerate the Patients 2–6 PDFs from their cached curves so the committed figures use
+   the corrected target-versus-organ emphasis rule. No clinical solve needs to be repeated.
+8. Obtain approved compute before scaling much beyond the committed patients. The cohort
    size is now confirmed rather than assumed: PortPy publishes **201 lung patients**
    (`Lung_Patient_2` through `Lung_Patient_202`, contiguous) and 129 prostate patients, so
    the meeting estimates of "20 or 50" were both wrong. At roughly one hour of GA wall time
@@ -60,5 +74,5 @@ individual ownership.
 - Simulated annealing, memetic algorithms, and explainability extensions.
 - Clinical-expert outreach and paper promotion until the implementation and results are
   validated.
-- Paper drafting beyond methods scaffolding until the compute comparison and repeat-seed
-  results are available.
+- MILP development until the core Results section, review, and objective-term analysis are
+  complete.

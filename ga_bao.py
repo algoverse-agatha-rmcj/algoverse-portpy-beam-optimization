@@ -52,7 +52,6 @@ import argparse
 import json
 import math
 import random
-import statistics
 import sys
 import time
 from pathlib import Path
@@ -157,9 +156,9 @@ class BAOProblem:
     def solve_time_stats(self):
         """Per-solve wall time, summarized.
 
-        Both statistics the team disagreed about are reported rather than one:
-        the mean, and the median that a single stalled solve cannot distort.
-        `max` makes such a stall visible instead of leaving it inferred.
+        The arithmetic mean is the team's canonical compute-time statistic.
+        `p95` and `max` keep unusually slow solves visible rather than replacing
+        the mean with a statistic that hides them.
         """
         times = sorted(self._solve_seconds.values())
         if not times:
@@ -167,7 +166,6 @@ class BAOProblem:
         return {
             "measured_solves": len(times),
             "mean_s": round(sum(times) / len(times), 3),
-            "median_s": round(statistics.median(times), 3),
             "p95_s": round(times[min(len(times) - 1, int(0.95 * len(times)))], 3),
             "min_s": round(times[0], 3),
             "max_s": round(times[-1], 3),
@@ -397,8 +395,8 @@ def main():
     stats = problem.solve_time_stats
     if stats:
         print(f"solve time (measured): n={stats['measured_solves']}  "
-              f"mean {stats['mean_s']}s  median {stats['median_s']}s  "
-              f"p95 {stats['p95_s']}s  max {stats['max_s']}s")
+              f"mean {stats['mean_s']}s  p95 {stats['p95_s']}s  "
+              f"max {stats['max_s']}s")
     print(f"saved -> {args.out}  (cache: {ckpt})")
 
 
