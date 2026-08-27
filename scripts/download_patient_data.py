@@ -76,15 +76,26 @@ def main() -> None:
                     planner_path = dest / patient / "PlannerBeams.json"
                     planner = json.loads(planner_path.read_text())["IDs"]
                     dropped = excluded_ids(angles)
-                    comparison_beams = sorted(
-                        set(ga_beams) | (set(map(int, planner)) - dropped))
+                    # The GA pool excludes 180 deg, but the clinician's plan is the
+                    # BASELINE and clinical_compare.py solves PlannerBeams.json
+                    # unmodified. Subtracting `dropped` here left a clinician beam at
+                    # 180 deg required-but-never-downloaded: Lung_Patient_30 died in
+                    # clinical_compare 42 min in, and 31 and 32 carry the same beam.
+                    # Never apply the GA's search-space exclusion to the baseline plan.
+                    planner_ids = set(map(int, planner))
+                    comparison_beams = sorted(set(ga_beams) | planner_ids)
                     pp.download_portpy_data(
                         patient, out=str(REPO_PARENT), beam_mode="ids",
                         beam_ids=comparison_beams, max_workers=1)
                     grid = sorted(angles[b] for b in ga_beams)
+                    on_excluded = sorted(planner_ids & dropped)
+                    note = (f"; clinician beams {on_excluded} sit on excluded angles "
+                            "and are downloaded for the baseline anyway"
+                            if on_excluded else "")
                     print(f"  GA beam pool: {len(ga_beams)} beams at "
                           f"{grid[0]:g}-{grid[-1]:g} deg (180 degrees excluded); "
-                          f"{len(comparison_beams)} beams downloaded with clinician set")
+                          f"{len(comparison_beams)} beams downloaded with clinician set"
+                          f"{note}")
                 else:
                     pp.download_portpy_data(
                         patient,

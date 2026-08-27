@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import argparse
 import re
+import sys
+import traceback
 import shutil
 import subprocess
 import time
@@ -189,8 +191,13 @@ def data_complete(patient: str) -> bool:
         return False
     planner = {int(x) for x in planner_payload["IDs"]}
     angles = fetch_angle_map(patient, DATA_ROOT)
-    dropped = excluded_ids(angles)
-    expected = set(grid_pool(angles)) | (planner - dropped)
+    # Two different sets, deliberately. The GA may only SEARCH
+    # grid_pool | (planner - dropped) -- widening that would change the protocol -- but
+    # clinical_compare.py solves the clinician's plan UNMODIFIED, so every planner beam
+    # must be present on disk, including one sitting on an excluded angle. Conflating
+    # the two is what let Lung_Patient_30 pass this check with Beam_5_Data.h5 missing
+    # and then die in clinical_compare 42 minutes later.
+    expected = set(grid_pool(angles)) | planner
     present = {
         int(path.name.split("_")[1])
         for path in (data_dir / "Beams").glob("Beam_*_Data.h5")
@@ -463,6 +470,7 @@ def main() -> None:
         atomic_write_json(manifest_path, record)
     print(f"predeclared batch manifest -> {manifest_path}", flush=True)
 
+    failures: list[str] = []
     for patient in args.patients:
         record["patients"][patient] = {"status": "running", "updated_at_utc": utc_now()}
         atomic_write_json(manifest_path, record)
@@ -476,13 +484,24 @@ def main() -> None:
             atomic_write_json(manifest_path, record)
             raise
         except Exception as exc:
+            # Do NOT abort the lane. One patient's upstream data defect used to kill
+            # every remaining patient behind it: Lung_Patient_30 failed 42 min in and
+            # took 31-35 with it, losing ~20 unattended hours. Record the failure and
+            # move on -- the predeclared list is unchanged, so the batch is still
+            # reported as "N predeclared, M completed, K failed" with reasons, and
+            # which patients complete no longer depends on where the first defect sits.
             record["patients"][patient] = {
                 "status": "failed",
                 "updated_at_utc": utc_now(),
                 "error": f"{type(exc).__name__}: {exc}",
             }
             atomic_write_json(manifest_path, record)
-            raise
+            failures.append(patient)
+            print(f"\n[FAILED] {patient}: {type(exc).__name__}: {exc}", flush=True)
+            traceback.print_exc()
+            print(f"[continuing] {len(failures)} failed so far; "
+                  "moving to the next predeclared patient", flush=True)
+            continue
         record["patients"][patient] = {
             "status": "completed",
             "updated_at_utc": utc_now(),
@@ -490,7 +509,14 @@ def main() -> None:
         atomic_write_json(manifest_path, record)
     record["completed_at_utc"] = utc_now()
     atomic_write_json(manifest_path, record)
-    print("\nBatch complete.", flush=True)
+    completed = [pt for pt in args.patients
+                 if record["patients"].get(pt, {}).get("status") == "completed"]
+    print(f"\nBatch complete. {len(args.patients)} predeclared, "
+          f"{len(completed)} completed, {len(failures)} failed.", flush=True)
+    if failures:
+        # Non-zero exit so an unattended lane cannot look clean when it is not.
+        print("failed patients: " + ", ".join(failures), flush=True)
+        sys.exit(1)
 
 
 if __name__ == "__main__":
