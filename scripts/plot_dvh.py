@@ -32,6 +32,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from beam_angles import fetch_angle_map, format_angles
+from experiment_protocol import (
+    DOWNSAMPLE_BEAMLET_FACTOR,
+    DOWNSAMPLE_VOXEL_FACTORS,
+    PROTOCOL_NAME,
+    downsample_dimensions,
+)
+from timing import timing_label
 
 import numpy as np
 import matplotlib
@@ -51,7 +58,7 @@ if __package__:
 else:
     from metric_ranking import select_best_plans
 
-PROTOCOL = "Lung_2Gy_30Fx"
+PROTOCOL = PROTOCOL_NAME
 
 STRUCTS = ["PTV", "HEART", "LUNGS_NOT_GTV", "ESOPHAGUS", "CORD"]
 # Page 1 puts every curve on one axes, so its colours must be separable pairwise.
@@ -91,10 +98,14 @@ def solve_set(data_dir, patient, beams, downsample):
     bm = pp.Beams(data, beam_ids=list(beams))
     inf = pp.InfluenceMatrix(ct=ct, structs=structs, beams=bm)
     if downsample:
-        opt_vox = [r * f for r, f in zip(ct.get_ct_res_xyz_mm(), (6, 6, 1))]
+        opt_vox, beamlet_width, beamlet_height = downsample_dimensions(
+            ct.get_ct_res_xyz_mm(),
+            bm.get_finest_beamlet_width(),
+            bm.get_finest_beamlet_height(),
+        )
         inf = inf.create_down_sample(
-            beamlet_width_mm=bm.get_finest_beamlet_width() * 4,
-            beamlet_height_mm=bm.get_finest_beamlet_height() * 4,
+            beamlet_width_mm=beamlet_width,
+            beamlet_height_mm=beamlet_height,
             opt_vox_xyz_res_mm=opt_vox)
     plan = pp.Plan(ct=ct, structs=structs, beams=bm, inf_matrix=inf, clinical_criteria=cc)
 
@@ -112,7 +123,7 @@ def recorded_structs(cache):
     return [str(x) for x in names] if names is not None else list(STRUCTS)
 
 
-def collect(data_dir, patient, downsample, cache_path, beam_sets):
+def collect(data_dir, patient, downsample, cache_path, beam_sets, protocol_fingerprint):
     out = {}
     for name in PLANS:
         beams = beam_sets[name]
@@ -138,6 +149,10 @@ def collect(data_dir, patient, downsample, cache_path, beam_sets):
         print(f"objective {obj:.4f} | {time.time() - t0:.0f}s", flush=True)
 
     out["downsampled"] = np.asarray([1 if downsample else 0])
+    out["downsample_voxel_factors"] = np.asarray(DOWNSAMPLE_VOXEL_FACTORS)
+    out["downsample_beamlet_factor"] = np.asarray([DOWNSAMPLE_BEAMLET_FACTOR])
+    if protocol_fingerprint is not None:
+        out["source_protocol_fingerprint"] = np.asarray([protocol_fingerprint])
     np.savez_compressed(cache_path, **out)
     print(f"\ncurves cached -> {cache_path}")
     return out
@@ -237,6 +252,27 @@ def check_provenance(C, raw, criteria_path):
             f"{criteria_path} is {'down-sampled' if table_ds else 'full resolution'}. "
             "Down-sampling does not preserve per-organ metrics, so the table would not "
             "describe the plotted curves.")
+
+    source_fingerprints = {
+        raw[name].get("source_protocol_fingerprint")
+        for name in PLANS
+        if raw[name].get("source_protocol_fingerprint") is not None
+    }
+    if len(source_fingerprints) > 1:
+        raise SystemExit(f"{criteria_path}: plans disagree on their source GA protocol.")
+    if source_fingerprints and "source_protocol_fingerprint" in C:
+        expected = source_fingerprints.pop()
+        cached = str(C["source_protocol_fingerprint"][0])
+        if cached != expected:
+            raise SystemExit(
+                f"protocol mismatch: cached curves use {cached}, but {criteria_path} "
+                f"uses {expected}. Rebuild the curves for this comparison."
+            )
+    if table_ds and "downsample_voxel_factors" in C:
+        cached_voxels = tuple(int(value) for value in C["downsample_voxel_factors"])
+        cached_beamlet = int(C["downsample_beamlet_factor"][0])
+        if cached_voxels != DOWNSAMPLE_VOXEL_FACTORS or cached_beamlet != DOWNSAMPLE_BEAMLET_FACTOR:
+            raise SystemExit("cached curves use a different downsampling recipe")
     return bool(table_ds)
 
 
@@ -462,7 +498,9 @@ def page_table(pdf, criteria, raw, patient, downsampled, criteria_path):
     for label, get, fmt in (
             ("PTV D95 (target coverage)", lambda n: raw[n].get("PTV_D95_Gy"), "{:.2f}"),
             ("Objective value (search signal)", lambda n: raw[n].get("objective"), "{:.2f}"),
-            ("Solve time", lambda n: raw[n].get("solve_time_s"), "{:.0f} s")):
+            # Pre-2026-08-26 bundles timed the whole pipeline under this key, so the row
+            # says which of the two it is rather than calling both a solve time.
+            (timing_label(raw[PLANS[0]]), lambda n: raw[n].get("solve_time_s"), "{:.0f} s")):
         y -= step
         fig.text(label_x, y, label, fontsize=8.5, color=MUTED, va="center")
         for x, name in zip(plan_x, PLANS):
@@ -522,7 +560,15 @@ def main():
     patient_results = Path("results") / args.patient
     resolution = "downsampled" if args.downsample else "full_resolution"
     if args.cache is None:
-        args.cache = str(patient_results / "cache" / f"{args.patient}_DVH_curves.npz")
+        cache_path = (
+            patient_results / "cache" / f"{args.patient}_DVH_curves_{resolution}.npz"
+        )
+        legacy_cache = patient_results / "cache" / f"{args.patient}_DVH_curves.npz"
+        # Old caches remain usable only through the explicit --from-cache path, where
+        # check_provenance() verifies their beams and resolution before plotting.
+        if args.from_cache and not cache_path.exists() and legacy_cache.exists():
+            cache_path = legacy_cache
+        args.cache = str(cache_path)
     if args.criteria is None:
         args.criteria = str(
             patient_results / "clinical_comparison"
@@ -538,12 +584,27 @@ def main():
 
     raw, criteria = load_criteria(args.criteria)
     beam_sets = {name: raw[name]["beams"] for name in PLANS}
+    protocol_fingerprints = {
+        raw[name].get("source_protocol_fingerprint")
+        for name in PLANS
+        if raw[name].get("source_protocol_fingerprint") is not None
+    }
+    if len(protocol_fingerprints) > 1:
+        raise SystemExit(f"{args.criteria}: plans disagree on their source GA protocol.")
+    protocol_fingerprint = next(iter(protocol_fingerprints), None)
 
     if args.from_cache:
         C = dict(np.load(args.cache))
         print(f"loaded cached curves <- {args.cache}")
     else:
-        C = collect(args.data_dir, args.patient, args.downsample, args.cache, beam_sets)
+        C = collect(
+            args.data_dir,
+            args.patient,
+            args.downsample,
+            args.cache,
+            beam_sets,
+            protocol_fingerprint,
+        )
 
     table_ds = check_provenance(C, raw, args.criteria)
     if table_ds is None:

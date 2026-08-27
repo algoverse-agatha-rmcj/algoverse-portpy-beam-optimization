@@ -26,9 +26,13 @@ import json
 import time
 from pathlib import Path
 
+if __package__:
+    from .experiment_protocol import EXCLUDED_GANTRY_DEG, GRID_STEP_DEG
+else:
+    from experiment_protocol import EXCLUDED_GANTRY_DEG, GRID_STEP_DEG
+
 REPO_ID = "PortPy-Project/PortPy_Dataset"
-GRID_STEP_DEG = 15.0
-EXCLUDED_DEG = (180.0,)
+EXCLUDED_DEG = EXCLUDED_GANTRY_DEG
 _TOL = 1e-6
 # Retry budget for the metadata fetch: ~10 min of transient-outage tolerance.
 FETCH_ATTEMPTS = 8

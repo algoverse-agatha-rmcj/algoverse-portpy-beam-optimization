@@ -4,6 +4,7 @@ import unittest
 from pathlib import Path
 
 from scripts.run_patient_batch import (
+    KNOWN_UNUSABLE_PATIENTS,
     comparison_complete,
     ga_complete,
     valid_patient,
@@ -56,12 +57,22 @@ class PatientSelectionTests(unittest.TestCase):
             with self.subTest(patient=patient):
                 self.assertFalse(valid_patient(patient))
 
+    def test_known_upstream_data_failures_are_explicitly_excluded(self):
+        self.assertEqual(
+            KNOWN_UNUSABLE_PATIENTS,
+            {"Lung_Patient_12", "Lung_Patient_13"},
+        )
+
     def test_ga_checkpoint_must_belong_to_the_requested_patient(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "ga.json"
             payload = {
                 "patient": "Lung_Patient_15",
+                "k": 7,
+                "pop": 20,
                 "gens": 40,
+                "mutation_rate": 0.15,
+                "seed": 0,
                 "history": [0.0] * 40,
                 "pool": [0, 3, 6],
                 "best_angles": [0, 3, 6],
@@ -69,6 +80,57 @@ class PatientSelectionTests(unittest.TestCase):
             path.write_text(json.dumps(payload))
             self.assertTrue(ga_complete(path, "Lung_Patient_15", set()))
             self.assertFalse(ga_complete(path, "Lung_Patient_16", set()))
+
+    def test_ga_checkpoint_must_match_every_primary_setting(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "ga.json"
+            base = {
+                "patient": "Lung_Patient_21",
+                "k": 7,
+                "pop": 20,
+                "gens": 40,
+                "mutation_rate": 0.15,
+                "seed": 0,
+                "history": [0.0] * 40,
+                "pool": [0, 3, 6],
+                "best_angles": [0, 3, 6],
+            }
+            path.write_text(json.dumps(base))
+            self.assertTrue(
+                ga_complete(path, "Lung_Patient_21", set(), {0, 3, 6})
+            )
+            for field, changed in (
+                ("k", 5),
+                ("pop", 30),
+                ("gens", 60),
+                ("mutation_rate", 0.20),
+                ("seed", 1),
+            ):
+                with self.subTest(field=field):
+                    payload = dict(base)
+                    payload[field] = changed
+                    path.write_text(json.dumps(payload))
+                    self.assertFalse(
+                        ga_complete(path, "Lung_Patient_21", set(), {0, 3, 6})
+                    )
+
+    def test_ga_checkpoint_must_match_expected_candidate_pool(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "ga.json"
+            path.write_text(json.dumps({
+                "patient": "Lung_Patient_21",
+                "k": 7,
+                "pop": 20,
+                "gens": 40,
+                "mutation_rate": 0.15,
+                "seed": 0,
+                "history": [0.0] * 40,
+                "pool": [0, 3, 6],
+                "best_angles": [0, 3, 6],
+            }))
+            self.assertFalse(
+                ga_complete(path, "Lung_Patient_21", set(), {0, 3, 9})
+            )
 
 
 if __name__ == "__main__":

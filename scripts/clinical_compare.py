@@ -21,7 +21,15 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from beam_angles import excluded_ids, fetch_angle_map, format_angles
+from experiment_protocol import (
+    PROTOCOL_NAME,
+    downsample_dimensions,
+    fingerprint,
+    primary_config_mismatches,
+    result_scientific_config,
+)
 from objective_terms import active_objective_specs, serialize_objective_terms
+from timing import TIMING_SCHEMA
 
 import portpy.photon as pp
 
@@ -30,10 +38,11 @@ if __package__:
 else:
     from json_io import atomic_write_json
 
-PROTOCOL = "Lung_2Gy_30Fx"
+PROTOCOL = PROTOCOL_NAME
 
 
 def solve_set(data_dir, patient, beams, downsample):
+    setup_t0 = time.perf_counter()
     data = pp.DataExplorer(data_dir=data_dir)
     data.patient_id = patient
     ct = pp.CT(data)
@@ -45,16 +54,31 @@ def solve_set(data_dir, patient, beams, downsample):
     bm = pp.Beams(data, beam_ids=list(beams))
     inf = pp.InfluenceMatrix(ct=ct, structs=structs, beams=bm)
     if downsample:
-        opt_vox = [r * f for r, f in zip(ct.get_ct_res_xyz_mm(), (6, 6, 1))]
+        opt_vox, beamlet_width, beamlet_height = downsample_dimensions(
+            ct.get_ct_res_xyz_mm(),
+            bm.get_finest_beamlet_width(),
+            bm.get_finest_beamlet_height(),
+        )
         inf = inf.create_down_sample(
-            beamlet_width_mm=bm.get_finest_beamlet_width() * 4,
-            beamlet_height_mm=bm.get_finest_beamlet_height() * 4,
+            beamlet_width_mm=beamlet_width,
+            beamlet_height_mm=beamlet_height,
             opt_vox_xyz_res_mm=opt_vox)
     plan = pp.Plan(ct=ct, structs=structs, beams=bm, inf_matrix=inf, clinical_criteria=cc)
 
     opt = pp.Optimization(plan, opt_params=opt_params, clinical_criteria=cc)
     opt.create_cvxpy_problem()
+    # Everything above is setup — loading the patient, building the influence matrix and,
+    # when asked, down-sampling it. Timing it together with the solve made the down-sampled
+    # variant pay for its own down-sampling and hid the speedup entirely; bracket MOSEK alone.
+    setup_s = time.perf_counter() - setup_t0
+    solve_t0 = time.perf_counter()
     sol, prob = opt.solve(solver="MOSEK", verbose=False, return_cvxpy_prob=True)
+    solve_s = time.perf_counter() - solve_t0
+    timing = {
+        "setup_time_s": round(setup_s, 1),
+        "solve_time_s": round(solve_s, 1),
+        "total_time_s": round(setup_s + solve_s, 1),
+    }
     structure_names = set(plan.structures.get_structures())
     nonempty_structures = {
         structure for structure in structure_names
@@ -75,7 +99,7 @@ def solve_set(data_dir, patient, beams, downsample):
         abs_tol=1e-6,
     ):
         raise RuntimeError("serialized objective terms do not sum to total objective")
-    return plan, cc, sol, float(prob.value), inf.A.shape, objective_terms
+    return plan, cc, sol, float(prob.value), inf.A.shape, objective_terms, timing
 
 
 def criteria_table(cc, sol, dose_1d):
@@ -119,6 +143,11 @@ def main():
     )
     ap.add_argument("--downsample", action="store_true",
                     help="down-sample (fast sanity check); default is full resolution")
+    ap.add_argument(
+        "--require-primary-protocol",
+        action="store_true",
+        help="refuse GA results outside the frozen seed-0 20x40 primary cohort",
+    )
     ap.add_argument("--out", default=None)
     args = ap.parse_args()
 
@@ -135,6 +164,14 @@ def main():
             f"{ga_result_path}: patient is {ga_result.get('patient')!r}, "
             f"expected {args.patient!r}"
         )
+    mismatches = primary_config_mismatches(ga_result)
+    if args.require_primary_protocol and mismatches:
+        raise SystemExit(
+            f"{ga_result_path}: not compatible with the frozen seed-0 primary cohort:\n  - "
+            + "\n  - ".join(mismatches)
+        )
+    source_config = result_scientific_config(ga_result)
+    source_fingerprint = fingerprint(source_config)
     ga_beams = [int(b) for b in ga_result["best_angles"]]
     # Checked by real gantry angle: beam 36 is 180 degrees only on patients 2-10.
     angle_map = fetch_angle_map(args.patient, args.data_dir)
@@ -168,7 +205,7 @@ def main():
             flush=True,
         )
         t0 = time.time()
-        plan, cc, sol, obj, shape, objective_terms = solve_set(
+        plan, cc, sol, obj, shape, objective_terms, timing = solve_set(
             args.data_dir, args.patient, beams, args.downsample
         )
         # sol has no 'dose_1d'; criteria are whole-course Gy, so scale by fractions.
@@ -179,12 +216,19 @@ def main():
         results[name] = {"beams": beams, "objective": obj,
                          "objective_terms": objective_terms, "A_shape": list(shape),
                          "downsampled": bool(args.downsample),
+                         "source_protocol_fingerprint": source_fingerprint,
+                         "evaluation_resolution": (
+                             "downsampled" if args.downsample else "full_resolution"
+                         ),
                          "PTV_D95_Gy": ptv_d95, "criteria": rows,
-                         "solve_time_s": round(time.time() - t0, 1)}
+                         "timing_schema": TIMING_SCHEMA,
+                         **timing,
+                         "scored_time_s": round(time.time() - t0, 1)}
         if name == "GA":
             results[name]["source_ga_result"] = str(ga_result_path)
-        print(f"objective {obj:.4f} | PTV D95 {ptv_d95:.2f} Gy | "
-              f"A {shape} | {time.time()-t0:.0f}s", flush=True)
+        print(f"objective {obj:.4f} | PTV D95 {ptv_d95:.2f} Gy | A {shape} | "
+              f"setup {timing['setup_time_s']:.0f}s + solve "
+              f"{timing['solve_time_s']:.0f}s", flush=True)
         atomic_write_json(args.out, results)
 
     # summary

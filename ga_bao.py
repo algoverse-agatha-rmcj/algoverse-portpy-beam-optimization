@@ -61,6 +61,21 @@ import portpy.photon as pp
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "scripts"))
 from beam_angles import excluded_ids, fetch_angle_map, format_angles, grid_pool
+from experiment_protocol import (
+    DOWNSAMPLE_BEAMLET_FACTOR,
+    DOWNSAMPLE_VOXEL_FACTORS,
+    PRIMARY_GENERATIONS,
+    PRIMARY_K,
+    PRIMARY_MUTATION_RATE,
+    PRIMARY_POPULATION,
+    PRIMARY_SEED,
+    PROTOCOL_NAME,
+    build_run_manifest,
+    cache_payload,
+    fingerprint,
+    scientific_config,
+    validated_cache_entries,
+)
 
 from scripts.json_io import atomic_write_json, read_json
 
@@ -74,10 +89,12 @@ class BAOProblem:
     """Loads a patient once, down-samples once, and scores beam sets on demand."""
 
     def __init__(self, data_dir, patient_id, candidate_pool,
-                 protocol_name="Lung_2Gy_30Fx",
-                 voxel_factors=(6, 6, 1), beamlet_factor=4,
-                 downsample=True):
+                 protocol_name=PROTOCOL_NAME,
+                 voxel_factors=DOWNSAMPLE_VOXEL_FACTORS,
+                 beamlet_factor=DOWNSAMPLE_BEAMLET_FACTOR,
+                 downsample=True, cache_identity=None):
         self.candidate_pool = list(candidate_pool)
+        self.cache_identity = cache_identity
 
         # --- load the patient (cheap handles) ---
         data = pp.DataExplorer(data_dir=data_dir)
@@ -178,22 +195,24 @@ class BAOProblem:
 
     def save_cache(self, path):
         """Persist the solve cache so a crashed/interrupted run can resume for free."""
-        data = [
+        entries = [
             {"beams": sorted(bs), "score": sc,
              **({"seconds": round(self._solve_seconds[bs], 4)} if bs in self._solve_seconds else {})}
             for bs, sc in self._cache.items()
         ]
-        atomic_write_json(path, data)
+        if self.cache_identity is None:
+            raise RuntimeError("cache identity was not configured")
+        atomic_write_json(path, cache_payload(self.cache_identity, entries))
 
     def load_cache(self, path):
         """Reload a previously saved cache (same seed => the GA replays instantly)."""
         p = Path(path)
         if p.exists():
             cached = read_json(p)
-            if not isinstance(cached, list):
-                print(f"[checkpoint] ignored incomplete cache {p.name}")
-                return
-            for item in cached:
+            if self.cache_identity is None:
+                raise RuntimeError("cache identity was not configured")
+            entries = validated_cache_entries(cached, self.cache_identity)
+            for item in entries:
                 key = frozenset(item["beams"])
                 self._cache[key] = item["score"]
                 if "seconds" in item:
@@ -291,11 +310,12 @@ def main():
     ap.add_argument("--pool", type=int, nargs="+", default=None,
                     help="Candidate beam_ids to search over (default: every 15 degrees, "
                          "excluding 180 degrees; needs --beam-mode ga data).")
-    ap.add_argument("--k", type=int, default=7, help="Number of beams to select.")
-    ap.add_argument("--pop", type=int, default=20, help="Population size.")
-    ap.add_argument("--gens", type=int, default=40, help="Number of generations.")
-    ap.add_argument("--mutation-rate", type=float, default=0.15)
-    ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--k", type=int, default=PRIMARY_K, help="Number of beams to select.")
+    ap.add_argument("--pop", type=int, default=PRIMARY_POPULATION, help="Population size.")
+    ap.add_argument("--gens", type=int, default=PRIMARY_GENERATIONS,
+                    help="Number of generations.")
+    ap.add_argument("--mutation-rate", type=float, default=PRIMARY_MUTATION_RATE)
+    ap.add_argument("--seed", type=int, default=PRIMARY_SEED)
     ap.add_argument("--no-downsample", action="store_true",
                     help="Use full-resolution matrices (slower per solve, more RAM; "
                          "skips patchify + the down-sampler patch).")
@@ -347,17 +367,98 @@ def main():
     if overlap:
         raise SystemExit(f"candidate pool contains beam(s) {overlap} at 180 degrees; "
                          "remove them for the couch-aware comparison protocol")
+    unknown = sorted(set(args.pool) - set(angles))
+    if unknown:
+        raise SystemExit(f"candidate pool contains beam IDs with no metadata: {unknown}")
+    if len(set(args.pool)) != len(args.pool):
+        raise SystemExit("candidate pool contains duplicate beam IDs")
+    if args.k <= 0 or args.k > len(args.pool):
+        raise SystemExit(f"--k must be between 1 and the pool size ({len(args.pool)})")
+    if args.pop < 3:
+        raise SystemExit("--pop must be at least 3 for tournament selection")
+    if args.gens <= 0:
+        raise SystemExit("--gens must be positive")
+    if not 0.0 <= args.mutation_rate <= 1.0:
+        raise SystemExit("--mutation-rate must be between 0 and 1")
+
+    config = scientific_config(
+        k=args.k,
+        population=args.pop,
+        generations=args.gens,
+        mutation_rate=args.mutation_rate,
+        seed=args.seed,
+        downsampled=not args.no_downsample,
+    )
+    manifest = build_run_manifest(
+        patient=args.patient,
+        candidate_pool=args.pool,
+        angle_map=angles,
+        clinician_beams=planner,
+        config=config,
+        repo_root=Path(__file__).resolve().parent,
+        data_dir=args.data_dir,
+    )
+
+    existing = read_json(args.out)
+    if isinstance(existing, dict):
+        existing_manifest = existing.get("protocol_manifest")
+        if isinstance(existing_manifest, dict):
+            if existing_manifest.get("cache_identity") != manifest["cache_identity"]:
+                raise SystemExit(
+                    f"{args.out}: existing result has different protocol/input provenance; "
+                    "choose a new --out instead of overwriting it"
+                )
+        else:
+            legacy_fields = {
+                "patient": args.patient,
+                "k": args.k,
+                "pop": args.pop,
+                "gens": args.gens,
+                "mutation_rate": args.mutation_rate,
+                "seed": args.seed,
+                "pool": args.pool,
+            }
+            mismatched = [
+                key for key, expected in legacy_fields.items()
+                if existing.get(key) != expected
+            ]
+            if mismatched:
+                raise SystemExit(
+                    f"{args.out}: legacy result differs in {mismatched}; "
+                    "choose a new --out instead of overwriting it"
+                )
+
+    manifest_path = Path(args.out).with_suffix(".manifest.json")
+    existing_run_manifest = read_json(manifest_path)
+    if isinstance(existing_run_manifest, dict):
+        if existing_run_manifest.get("cache_identity") != manifest["cache_identity"]:
+            raise SystemExit(
+                f"{manifest_path}: run manifest has different protocol/input provenance; "
+                "choose a new --out instead of mixing runs"
+            )
+    else:
+        atomic_write_json(manifest_path, manifest)
+    print(f"[manifest] frozen before optimization -> {manifest_path}")
 
     if args.checkpoint:
         ckpt = args.checkpoint
     elif using_default_out:
-        ckpt = str(patient_results / "cache" / (Path(args.out).name + ".cache.json"))
+        identity_short = manifest["cache_identity_sha256"][:12]
+        ckpt = str(
+            patient_results / "cache"
+            / f"{Path(args.out).stem}.protocol_{identity_short}.cache.json"
+        )
     else:
         ckpt = args.out + ".cache.json"
     Path(ckpt).parent.mkdir(parents=True, exist_ok=True)
 
-    problem = BAOProblem(args.data_dir, args.patient, args.pool,
-                         downsample=not args.no_downsample)
+    problem = BAOProblem(
+        args.data_dir,
+        args.patient,
+        args.pool,
+        downsample=not args.no_downsample,
+        cache_identity=manifest["cache_identity"],
+    )
     problem.load_cache(ckpt)   # resume: reuse any solves from a previous/interrupted run
 
     t0 = time.time()
@@ -367,6 +468,8 @@ def main():
             "patient": args.patient, "pool": args.pool, "k": args.k,
             "pop": args.pop, "gens": args.gens, "mutation_rate": args.mutation_rate,
             "seed": args.seed,
+            "protocol_manifest": manifest,
+            "protocol_fingerprint": fingerprint(config),
             "best_angles": list(best), "best_fitness": best_fit,
             # Real gantry angles, recorded alongside the IDs so downstream readers
             # never have to guess the ID->angle convention for this patient.
@@ -397,7 +500,7 @@ def main():
         print(f"solve time (measured): n={stats['measured_solves']}  "
               f"mean {stats['mean_s']}s  p95 {stats['p95_s']}s  "
               f"max {stats['max_s']}s")
-    print(f"saved -> {args.out}  (cache: {ckpt})")
+    print(f"saved -> {args.out}  (manifest: {manifest_path}; cache: {ckpt})")
 
 
 if __name__ == "__main__":
