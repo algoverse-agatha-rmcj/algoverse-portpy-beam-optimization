@@ -1,0 +1,924 @@
+{
+  "patient": "Lung_Patient_32",
+  "pool": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    49,
+    52,
+    55,
+    58,
+    61,
+    64,
+    67,
+    70,
+    73,
+    76,
+    79,
+    82,
+    88,
+    94,
+    100,
+    103,
+    106,
+    109,
+    112,
+    115,
+    118
+  ],
+  "k": 7,
+  "pop": 20,
+  "gens": 40,
+  "mutation_rate": 0.15,
+  "seed": 0,
+  "protocol_manifest": {
+    "manifest_schema": 1,
+    "experiment_id": "portpy-lung-ga-seed0-primary-v1",
+    "created_at_utc": "2026-08-27T07:05:09+00:00",
+    "patient": "Lung_Patient_32",
+    "scientific_config": {
+      "protocol_name": "Lung_2Gy_30Fx",
+      "beam_count": 7,
+      "population": 20,
+      "generations": 40,
+      "mutation_rate": 0.15,
+      "seed": 0,
+      "candidate_grid_step_deg": 15.0,
+      "excluded_gantry_deg": [
+        180.0
+      ],
+      "search_resolution": "downsampled",
+      "downsample_voxel_factors": [
+        6,
+        6,
+        1
+      ],
+      "downsample_beamlet_factor": 4,
+      "final_evaluation_resolution": "full_resolution"
+    },
+    "scientific_config_sha256": "4d3c5038adf39447dc27a1e209dc4996a70b8f7bd21661e4b81124fc90d0d90d",
+    "candidate_pool": [
+      {
+        "beam_id": 0,
+        "gantry_deg": 140.0
+      },
+      {
+        "beam_id": 1,
+        "gantry_deg": 355.0
+      },
+      {
+        "beam_id": 2,
+        "gantry_deg": 332.0
+      },
+      {
+        "beam_id": 3,
+        "gantry_deg": 295.0
+      },
+      {
+        "beam_id": 4,
+        "gantry_deg": 240.0
+      },
+      {
+        "beam_id": 5,
+        "gantry_deg": 210.0
+      },
+      {
+        "beam_id": 49,
+        "gantry_deg": 0.0
+      },
+      {
+        "beam_id": 52,
+        "gantry_deg": 15.0
+      },
+      {
+        "beam_id": 55,
+        "gantry_deg": 30.0
+      },
+      {
+        "beam_id": 58,
+        "gantry_deg": 45.0
+      },
+      {
+        "beam_id": 61,
+        "gantry_deg": 60.0
+      },
+      {
+        "beam_id": 64,
+        "gantry_deg": 75.0
+      },
+      {
+        "beam_id": 67,
+        "gantry_deg": 90.0
+      },
+      {
+        "beam_id": 70,
+        "gantry_deg": 105.0
+      },
+      {
+        "beam_id": 73,
+        "gantry_deg": 120.0
+      },
+      {
+        "beam_id": 76,
+        "gantry_deg": 135.0
+      },
+      {
+        "beam_id": 79,
+        "gantry_deg": 150.0
+      },
+      {
+        "beam_id": 82,
+        "gantry_deg": 165.0
+      },
+      {
+        "beam_id": 88,
+        "gantry_deg": 195.0
+      },
+      {
+        "beam_id": 94,
+        "gantry_deg": 225.0
+      },
+      {
+        "beam_id": 100,
+        "gantry_deg": 255.0
+      },
+      {
+        "beam_id": 103,
+        "gantry_deg": 270.0
+      },
+      {
+        "beam_id": 106,
+        "gantry_deg": 285.0
+      },
+      {
+        "beam_id": 109,
+        "gantry_deg": 300.0
+      },
+      {
+        "beam_id": 112,
+        "gantry_deg": 315.0
+      },
+      {
+        "beam_id": 115,
+        "gantry_deg": 330.0
+      },
+      {
+        "beam_id": 118,
+        "gantry_deg": 345.0
+      }
+    ],
+    "candidate_pool_size": 27,
+    "clinician_beams": [
+      {
+        "beam_id": 0,
+        "gantry_deg": 140.0
+      },
+      {
+        "beam_id": 1,
+        "gantry_deg": 355.0
+      },
+      {
+        "beam_id": 2,
+        "gantry_deg": 332.0
+      },
+      {
+        "beam_id": 3,
+        "gantry_deg": 295.0
+      },
+      {
+        "beam_id": 4,
+        "gantry_deg": 240.0
+      },
+      {
+        "beam_id": 5,
+        "gantry_deg": 210.0
+      },
+      {
+        "beam_id": 6,
+        "gantry_deg": 180.0
+      }
+    ],
+    "input_provenance": {
+      "dataset": "PortPy-Project/PortPy_Dataset",
+      "planner_beams_sha256": "79ecf21cf46dd6212c8fc69420bfec18ee02d293be066f78551502528a5971fc",
+      "beam_metadata_sha256": "2e4c3a8b9542ed6e1d81b249efa98515089fbed291f56e9dd44e7926ee12cbdf"
+    },
+    "code_provenance": {
+      "git_commit": "7f268f298a3649b5fda2313d17f1b5ff23a24637",
+      "git_dirty": true,
+      "source_files_sha256": {
+        "ga_bao.py": "5860b35ab24073e2e555a0bd8ef8152340bbaba4f1e6490fe533666f2e0fce75",
+        "scripts/beam_angles.py": "284aac8166632ba9d3a59cc3385ef126f7715174a753cdcdfff3a29761ca1ab4",
+        "scripts/experiment_protocol.py": "5a5472b0b350e4bf26d1ff4bf1e3ef3ae6831a4d135379b42fd926fbc015e9e2",
+        "scripts/clinical_compare.py": "9c3e02f531db619c5af70c586dc709a260c1a31fe71f3706ebc2c7690783e2a0",
+        "scripts/objective_terms.py": "4242b32f525795a579dd758ab127926dd1da606b0de14f13ef6f2e0ba180818f",
+        "scripts/plot_dvh.py": "af7b213da8350a7c7f5740d30377c90d106a9d06a043be038d0b067ab1da5748",
+        "scripts/run_patient_batch.py": "26440276c4bb280e39657568183e2f4755ca00be2ac95dca31719abcd1d3533f",
+        "scripts/timing.py": "0451921731459087aa01da2603a5ec215e260d51075608b8fd4ca28c9b51e813"
+      },
+      "source_bundle_sha256": "e6ebfec40d4355bc05527e0d0311686e9dffe51c95b95cf3fd994f66a0bb6c06",
+      "ga_source_bundle_sha256": "b523d9e2e4fbbce4ce8c7bf8ce0bffcfce925a7b86e7d70a44d90ba5e9657c6b",
+      "portpy_source_files_sha256": {
+        "photon/influence_matrix.py": "6fa4126b67560944ae7fa82ac02314fef411cc1ef2eb4ce9ff8aae08949a46f7",
+        "photon/optimization.py": "0e429e7deefdb9111560977b77a77b62f1535ee80dc99d8c530fc7991d7d0c2b"
+      },
+      "portpy_source_bundle_sha256": "93092fdc49800dd904c16054e750f5d2dc48ed9391361a0c5659e994e552a1c6",
+      "python_version": "3.11.16",
+      "packages": {
+        "portpy": "1.1.4",
+        "numpy": "2.4.6",
+        "cvxpy": "1.7.5",
+        "mosek": "11.2.2"
+      }
+    },
+    "analysis_policy": {
+      "primary_cohort_fields": [
+        "objective",
+        "clinical_metrics",
+        "winning_angles",
+        "ga_vs_clinician_improvement"
+      ],
+      "seed_policy": "one predeclared seed; never select the best of several seeds",
+      "new_only_fields": [
+        "objective_terms",
+        "timing_schema_2"
+      ]
+    },
+    "cache_identity": {
+      "patient": "Lung_Patient_32",
+      "scientific_config_sha256": "4d3c5038adf39447dc27a1e209dc4996a70b8f7bd21661e4b81124fc90d0d90d",
+      "candidate_pool_sha256": "a40ec73cde40907054191e9ef7a0338800a7240375fdeade6bd1c9d080aa525a",
+      "clinician_beams_sha256": "b510a2887119b817d7ddb83f13766ac4654d9df2278f40c0314f4afaf3d089a3",
+      "beam_metadata_sha256": "2e4c3a8b9542ed6e1d81b249efa98515089fbed291f56e9dd44e7926ee12cbdf",
+      "planner_beams_sha256": "79ecf21cf46dd6212c8fc69420bfec18ee02d293be066f78551502528a5971fc",
+      "ga_source_bundle_sha256": "b523d9e2e4fbbce4ce8c7bf8ce0bffcfce925a7b86e7d70a44d90ba5e9657c6b",
+      "portpy_version": "1.1.4",
+      "portpy_source_bundle_sha256": "93092fdc49800dd904c16054e750f5d2dc48ed9391361a0c5659e994e552a1c6"
+    },
+    "cache_identity_sha256": "852f1a482ba64741b853d02630069e3a621ab410a16750053e7f6b5aa2bec289"
+  },
+  "protocol_fingerprint": "4d3c5038adf39447dc27a1e209dc4996a70b8f7bd21661e4b81124fc90d0d90d",
+  "best_angles": [
+    49,
+    64,
+    67,
+    70,
+    79,
+    88,
+    100
+  ],
+  "best_fitness": 150.30782462615463,
+  "pool_gantry_deg": [
+    140.0,
+    355.0,
+    332.0,
+    295.0,
+    240.0,
+    210.0,
+    0.0,
+    15.0,
+    30.0,
+    45.0,
+    60.0,
+    75.0,
+    90.0,
+    105.0,
+    120.0,
+    135.0,
+    150.0,
+    165.0,
+    195.0,
+    225.0,
+    255.0,
+    270.0,
+    285.0,
+    300.0,
+    315.0,
+    330.0,
+    345.0
+  ],
+  "best_gantry_deg": [
+    0.0,
+    75.0,
+    90.0,
+    105.0,
+    150.0,
+    195.0,
+    255.0
+  ],
+  "unique_solves": 695,
+  "wall_time_s": 1979.6,
+  "solve_time_s": {
+    "measured_solves": 695,
+    "mean_s": 2.826,
+    "p95_s": 3.461,
+    "min_s": 2.474,
+    "max_s": 4.468,
+    "total_s": 1964.2
+  },
+  "history": [
+    {
+      "gen": 0,
+      "gen_best_fitness": 163.48905012258186,
+      "overall_best_fitness": 163.48905012258186,
+      "best_angles": [
+        49,
+        58,
+        64,
+        67,
+        76,
+        88,
+        115
+      ],
+      "unique_solves": 20
+    },
+    {
+      "gen": 1,
+      "gen_best_fitness": 159.1693872025979,
+      "overall_best_fitness": 159.1693872025979,
+      "best_angles": [
+        49,
+        64,
+        73,
+        76,
+        82,
+        88,
+        100
+      ],
+      "unique_solves": 39
+    },
+    {
+      "gen": 2,
+      "gen_best_fitness": 152.61480987966343,
+      "overall_best_fitness": 152.61480987966343,
+      "best_angles": [
+        49,
+        64,
+        67,
+        73,
+        82,
+        88,
+        100
+      ],
+      "unique_solves": 57
+    },
+    {
+      "gen": 3,
+      "gen_best_fitness": 152.61480987966343,
+      "overall_best_fitness": 152.61480987966343,
+      "best_angles": [
+        49,
+        64,
+        67,
+        73,
+        82,
+        88,
+        100
+      ],
+      "unique_solves": 74
+    },
+    {
+      "gen": 4,
+      "gen_best_fitness": 152.61480987966343,
+      "overall_best_fitness": 152.61480987966343,
+      "best_angles": [
+        49,
+        64,
+        67,
+        73,
+        82,
+        88,
+        100
+      ],
+      "unique_solves": 91
+    },
+    {
+      "gen": 5,
+      "gen_best_fitness": 152.61480987966343,
+      "overall_best_fitness": 152.61480987966343,
+      "best_angles": [
+        49,
+        64,
+        67,
+        73,
+        82,
+        88,
+        100
+      ],
+      "unique_solves": 110
+    },
+    {
+      "gen": 6,
+      "gen_best_fitness": 152.61480987966343,
+      "overall_best_fitness": 152.61480987966343,
+      "best_angles": [
+        49,
+        64,
+        67,
+        73,
+        82,
+        88,
+        100
+      ],
+      "unique_solves": 127
+    },
+    {
+      "gen": 7,
+      "gen_best_fitness": 152.61480987966343,
+      "overall_best_fitness": 152.61480987966343,
+      "best_angles": [
+        49,
+        64,
+        67,
+        73,
+        82,
+        88,
+        100
+      ],
+      "unique_solves": 146
+    },
+    {
+      "gen": 8,
+      "gen_best_fitness": 152.61480987966343,
+      "overall_best_fitness": 152.61480987966343,
+      "best_angles": [
+        49,
+        64,
+        67,
+        73,
+        82,
+        88,
+        100
+      ],
+      "unique_solves": 165
+    },
+    {
+      "gen": 9,
+      "gen_best_fitness": 152.61480987966343,
+      "overall_best_fitness": 152.61480987966343,
+      "best_angles": [
+        49,
+        64,
+        67,
+        73,
+        82,
+        88,
+        100
+      ],
+      "unique_solves": 183
+    },
+    {
+      "gen": 10,
+      "gen_best_fitness": 152.61480987966343,
+      "overall_best_fitness": 152.61480987966343,
+      "best_angles": [
+        49,
+        64,
+        67,
+        73,
+        82,
+        88,
+        100
+      ],
+      "unique_solves": 200
+    },
+    {
+      "gen": 11,
+      "gen_best_fitness": 152.61480987966343,
+      "overall_best_fitness": 152.61480987966343,
+      "best_angles": [
+        49,
+        64,
+        67,
+        73,
+        82,
+        88,
+        100
+      ],
+      "unique_solves": 216
+    },
+    {
+      "gen": 12,
+      "gen_best_fitness": 152.61480987966343,
+      "overall_best_fitness": 152.61480987966343,
+      "best_angles": [
+        49,
+        64,
+        67,
+        73,
+        82,
+        88,
+        100
+      ],
+      "unique_solves": 234
+    },
+    {
+      "gen": 13,
+      "gen_best_fitness": 152.61480987966343,
+      "overall_best_fitness": 152.61480987966343,
+      "best_angles": [
+        49,
+        64,
+        67,
+        73,
+        82,
+        88,
+        100
+      ],
+      "unique_solves": 251
+    },
+    {
+      "gen": 14,
+      "gen_best_fitness": 152.61480987966343,
+      "overall_best_fitness": 152.61480987966343,
+      "best_angles": [
+        49,
+        64,
+        67,
+        73,
+        82,
+        88,
+        100
+      ],
+      "unique_solves": 267
+    },
+    {
+      "gen": 15,
+      "gen_best_fitness": 152.61480987966343,
+      "overall_best_fitness": 152.61480987966343,
+      "best_angles": [
+        49,
+        64,
+        67,
+        73,
+        82,
+        88,
+        100
+      ],
+      "unique_solves": 278
+    },
+    {
+      "gen": 16,
+      "gen_best_fitness": 152.61480987966343,
+      "overall_best_fitness": 152.61480987966343,
+      "best_angles": [
+        49,
+        64,
+        67,
+        73,
+        82,
+        88,
+        100
+      ],
+      "unique_solves": 290
+    },
+    {
+      "gen": 17,
+      "gen_best_fitness": 152.61480987966343,
+      "overall_best_fitness": 152.61480987966343,
+      "best_angles": [
+        49,
+        64,
+        67,
+        73,
+        82,
+        88,
+        100
+      ],
+      "unique_solves": 307
+    },
+    {
+      "gen": 18,
+      "gen_best_fitness": 152.61480987966343,
+      "overall_best_fitness": 152.61480987966343,
+      "best_angles": [
+        49,
+        64,
+        67,
+        73,
+        82,
+        88,
+        100
+      ],
+      "unique_solves": 324
+    },
+    {
+      "gen": 19,
+      "gen_best_fitness": 152.61480987966343,
+      "overall_best_fitness": 152.61480987966343,
+      "best_angles": [
+        49,
+        64,
+        67,
+        73,
+        82,
+        88,
+        100
+      ],
+      "unique_solves": 343
+    },
+    {
+      "gen": 20,
+      "gen_best_fitness": 152.61480987966343,
+      "overall_best_fitness": 152.61480987966343,
+      "best_angles": [
+        49,
+        64,
+        67,
+        73,
+        82,
+        88,
+        100
+      ],
+      "unique_solves": 361
+    },
+    {
+      "gen": 21,
+      "gen_best_fitness": 152.61480987966343,
+      "overall_best_fitness": 152.61480987966343,
+      "best_angles": [
+        49,
+        64,
+        67,
+        73,
+        82,
+        88,
+        100
+      ],
+      "unique_solves": 380
+    },
+    {
+      "gen": 22,
+      "gen_best_fitness": 152.61480987966343,
+      "overall_best_fitness": 152.61480987966343,
+      "best_angles": [
+        49,
+        64,
+        67,
+        73,
+        82,
+        88,
+        100
+      ],
+      "unique_solves": 395
+    },
+    {
+      "gen": 23,
+      "gen_best_fitness": 152.61480987966343,
+      "overall_best_fitness": 152.61480987966343,
+      "best_angles": [
+        49,
+        64,
+        67,
+        73,
+        82,
+        88,
+        100
+      ],
+      "unique_solves": 412
+    },
+    {
+      "gen": 24,
+      "gen_best_fitness": 150.85674633822347,
+      "overall_best_fitness": 150.85674633822347,
+      "best_angles": [
+        49,
+        67,
+        70,
+        73,
+        79,
+        88,
+        100
+      ],
+      "unique_solves": 430
+    },
+    {
+      "gen": 25,
+      "gen_best_fitness": 150.85674633822347,
+      "overall_best_fitness": 150.85674633822347,
+      "best_angles": [
+        49,
+        67,
+        70,
+        73,
+        79,
+        88,
+        100
+      ],
+      "unique_solves": 448
+    },
+    {
+      "gen": 26,
+      "gen_best_fitness": 150.85674633822347,
+      "overall_best_fitness": 150.85674633822347,
+      "best_angles": [
+        49,
+        67,
+        70,
+        73,
+        79,
+        88,
+        100
+      ],
+      "unique_solves": 467
+    },
+    {
+      "gen": 27,
+      "gen_best_fitness": 150.85674633822347,
+      "overall_best_fitness": 150.85674633822347,
+      "best_angles": [
+        49,
+        67,
+        70,
+        73,
+        79,
+        88,
+        100
+      ],
+      "unique_solves": 484
+    },
+    {
+      "gen": 28,
+      "gen_best_fitness": 150.85674633822347,
+      "overall_best_fitness": 150.85674633822347,
+      "best_angles": [
+        49,
+        67,
+        70,
+        73,
+        79,
+        88,
+        100
+      ],
+      "unique_solves": 501
+    },
+    {
+      "gen": 29,
+      "gen_best_fitness": 150.85674633822347,
+      "overall_best_fitness": 150.85674633822347,
+      "best_angles": [
+        49,
+        67,
+        70,
+        73,
+        79,
+        88,
+        100
+      ],
+      "unique_solves": 519
+    },
+    {
+      "gen": 30,
+      "gen_best_fitness": 150.85674633822347,
+      "overall_best_fitness": 150.85674633822347,
+      "best_angles": [
+        49,
+        67,
+        70,
+        73,
+        79,
+        88,
+        100
+      ],
+      "unique_solves": 535
+    },
+    {
+      "gen": 31,
+      "gen_best_fitness": 150.30782462615463,
+      "overall_best_fitness": 150.30782462615463,
+      "best_angles": [
+        49,
+        64,
+        67,
+        70,
+        79,
+        88,
+        100
+      ],
+      "unique_solves": 553
+    },
+    {
+      "gen": 32,
+      "gen_best_fitness": 150.30782462615463,
+      "overall_best_fitness": 150.30782462615463,
+      "best_angles": [
+        49,
+        64,
+        67,
+        70,
+        79,
+        88,
+        100
+      ],
+      "unique_solves": 570
+    },
+    {
+      "gen": 33,
+      "gen_best_fitness": 150.30782462615463,
+      "overall_best_fitness": 150.30782462615463,
+      "best_angles": [
+        49,
+        64,
+        67,
+        70,
+        79,
+        88,
+        100
+      ],
+      "unique_solves": 586
+    },
+    {
+      "gen": 34,
+      "gen_best_fitness": 150.30782462615463,
+      "overall_best_fitness": 150.30782462615463,
+      "best_angles": [
+        49,
+        64,
+        67,
+        70,
+        79,
+        88,
+        100
+      ],
+      "unique_solves": 604
+    },
+    {
+      "gen": 35,
+      "gen_best_fitness": 150.30782462615463,
+      "overall_best_fitness": 150.30782462615463,
+      "best_angles": [
+        49,
+        64,
+        67,
+        70,
+        79,
+        88,
+        100
+      ],
+      "unique_solves": 623
+    },
+    {
+      "gen": 36,
+      "gen_best_fitness": 150.30782462615463,
+      "overall_best_fitness": 150.30782462615463,
+      "best_angles": [
+        49,
+        64,
+        67,
+        70,
+        79,
+        88,
+        100
+      ],
+      "unique_solves": 641
+    },
+    {
+      "gen": 37,
+      "gen_best_fitness": 150.30782462615463,
+      "overall_best_fitness": 150.30782462615463,
+      "best_angles": [
+        49,
+        64,
+        67,
+        70,
+        79,
+        88,
+        100
+      ],
+      "unique_solves": 659
+    },
+    {
+      "gen": 38,
+      "gen_best_fitness": 150.30782462615463,
+      "overall_best_fitness": 150.30782462615463,
+      "best_angles": [
+        49,
+        64,
+        67,
+        70,
+        79,
+        88,
+        100
+      ],
+      "unique_solves": 677
+    },
+    {
+      "gen": 39,
+      "gen_best_fitness": 150.30782462615463,
+      "overall_best_fitness": 150.30782462615463,
+      "best_angles": [
+        49,
+        64,
+        67,
+        70,
+        79,
+        88,
+        100
+      ],
+      "unique_solves": 695
+    }
+  ]
+}

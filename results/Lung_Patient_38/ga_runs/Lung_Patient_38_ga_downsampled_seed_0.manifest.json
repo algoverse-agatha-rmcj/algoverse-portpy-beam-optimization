@@ -1,0 +1,226 @@
+{
+  "manifest_schema": 1,
+  "experiment_id": "portpy-lung-ga-seed0-primary-v1",
+  "created_at_utc": "2026-08-27T04:32:52+00:00",
+  "patient": "Lung_Patient_38",
+  "scientific_config": {
+    "protocol_name": "Lung_2Gy_30Fx",
+    "beam_count": 7,
+    "population": 20,
+    "generations": 40,
+    "mutation_rate": 0.15,
+    "seed": 0,
+    "candidate_grid_step_deg": 15.0,
+    "excluded_gantry_deg": [
+      180.0
+    ],
+    "search_resolution": "downsampled",
+    "downsample_voxel_factors": [
+      6,
+      6,
+      1
+    ],
+    "downsample_beamlet_factor": 4,
+    "final_evaluation_resolution": "full_resolution"
+  },
+  "scientific_config_sha256": "4d3c5038adf39447dc27a1e209dc4996a70b8f7bd21661e4b81124fc90d0d90d",
+  "candidate_pool": [
+    {
+      "beam_id": 0,
+      "gantry_deg": 175.0
+    },
+    {
+      "beam_id": 1,
+      "gantry_deg": 160.0
+    },
+    {
+      "beam_id": 2,
+      "gantry_deg": 140.0
+    },
+    {
+      "beam_id": 3,
+      "gantry_deg": 55.0
+    },
+    {
+      "beam_id": 4,
+      "gantry_deg": 30.0
+    },
+    {
+      "beam_id": 5,
+      "gantry_deg": 0.0
+    },
+    {
+      "beam_id": 6,
+      "gantry_deg": 330.0
+    },
+    {
+      "beam_id": 10,
+      "gantry_deg": 15.0
+    },
+    {
+      "beam_id": 16,
+      "gantry_deg": 45.0
+    },
+    {
+      "beam_id": 19,
+      "gantry_deg": 60.0
+    },
+    {
+      "beam_id": 22,
+      "gantry_deg": 75.0
+    },
+    {
+      "beam_id": 25,
+      "gantry_deg": 90.0
+    },
+    {
+      "beam_id": 28,
+      "gantry_deg": 105.0
+    },
+    {
+      "beam_id": 31,
+      "gantry_deg": 120.0
+    },
+    {
+      "beam_id": 34,
+      "gantry_deg": 135.0
+    },
+    {
+      "beam_id": 37,
+      "gantry_deg": 150.0
+    },
+    {
+      "beam_id": 40,
+      "gantry_deg": 165.0
+    },
+    {
+      "beam_id": 46,
+      "gantry_deg": 195.0
+    },
+    {
+      "beam_id": 49,
+      "gantry_deg": 210.0
+    },
+    {
+      "beam_id": 52,
+      "gantry_deg": 225.0
+    },
+    {
+      "beam_id": 55,
+      "gantry_deg": 240.0
+    },
+    {
+      "beam_id": 58,
+      "gantry_deg": 255.0
+    },
+    {
+      "beam_id": 61,
+      "gantry_deg": 270.0
+    },
+    {
+      "beam_id": 64,
+      "gantry_deg": 285.0
+    },
+    {
+      "beam_id": 67,
+      "gantry_deg": 300.0
+    },
+    {
+      "beam_id": 70,
+      "gantry_deg": 315.0
+    },
+    {
+      "beam_id": 76,
+      "gantry_deg": 345.0
+    }
+  ],
+  "candidate_pool_size": 27,
+  "clinician_beams": [
+    {
+      "beam_id": 0,
+      "gantry_deg": 175.0
+    },
+    {
+      "beam_id": 1,
+      "gantry_deg": 160.0
+    },
+    {
+      "beam_id": 2,
+      "gantry_deg": 140.0
+    },
+    {
+      "beam_id": 3,
+      "gantry_deg": 55.0
+    },
+    {
+      "beam_id": 4,
+      "gantry_deg": 30.0
+    },
+    {
+      "beam_id": 5,
+      "gantry_deg": 0.0
+    },
+    {
+      "beam_id": 6,
+      "gantry_deg": 330.0
+    }
+  ],
+  "input_provenance": {
+    "dataset": "PortPy-Project/PortPy_Dataset",
+    "planner_beams_sha256": "79ecf21cf46dd6212c8fc69420bfec18ee02d293be066f78551502528a5971fc",
+    "beam_metadata_sha256": "e9a4ffb8be2c52e8c033f23c77244bc5da13d3ba454c15e0a69f55c9395f3681"
+  },
+  "code_provenance": {
+    "git_commit": "bfaafb8207af05d50a7672dfa98322a6ef9546da",
+    "git_dirty": true,
+    "source_files_sha256": {
+      "ga_bao.py": "5860b35ab24073e2e555a0bd8ef8152340bbaba4f1e6490fe533666f2e0fce75",
+      "scripts/beam_angles.py": "284aac8166632ba9d3a59cc3385ef126f7715174a753cdcdfff3a29761ca1ab4",
+      "scripts/experiment_protocol.py": "5a5472b0b350e4bf26d1ff4bf1e3ef3ae6831a4d135379b42fd926fbc015e9e2",
+      "scripts/clinical_compare.py": "9c3e02f531db619c5af70c586dc709a260c1a31fe71f3706ebc2c7690783e2a0",
+      "scripts/objective_terms.py": "4242b32f525795a579dd758ab127926dd1da606b0de14f13ef6f2e0ba180818f",
+      "scripts/plot_dvh.py": "af7b213da8350a7c7f5740d30377c90d106a9d06a043be038d0b067ab1da5748",
+      "scripts/run_patient_batch.py": "b01358cb1357e5792935f6912df1ba6066d582d069e5eb3e1a8bb2ac9d7e1fb7",
+      "scripts/timing.py": "0451921731459087aa01da2603a5ec215e260d51075608b8fd4ca28c9b51e813"
+    },
+    "source_bundle_sha256": "49b7cdce7cf00e626022b69d913693a85923f0f9d23022af2b9b5e8c8c3ea769",
+    "ga_source_bundle_sha256": "b523d9e2e4fbbce4ce8c7bf8ce0bffcfce925a7b86e7d70a44d90ba5e9657c6b",
+    "portpy_source_files_sha256": {
+      "photon/influence_matrix.py": "6fa4126b67560944ae7fa82ac02314fef411cc1ef2eb4ce9ff8aae08949a46f7",
+      "photon/optimization.py": "0e429e7deefdb9111560977b77a77b62f1535ee80dc99d8c530fc7991d7d0c2b"
+    },
+    "portpy_source_bundle_sha256": "93092fdc49800dd904c16054e750f5d2dc48ed9391361a0c5659e994e552a1c6",
+    "python_version": "3.11.16",
+    "packages": {
+      "portpy": "1.1.4",
+      "numpy": "2.4.6",
+      "cvxpy": "1.7.5",
+      "mosek": "11.2.2"
+    }
+  },
+  "analysis_policy": {
+    "primary_cohort_fields": [
+      "objective",
+      "clinical_metrics",
+      "winning_angles",
+      "ga_vs_clinician_improvement"
+    ],
+    "seed_policy": "one predeclared seed; never select the best of several seeds",
+    "new_only_fields": [
+      "objective_terms",
+      "timing_schema_2"
+    ]
+  },
+  "cache_identity": {
+    "patient": "Lung_Patient_38",
+    "scientific_config_sha256": "4d3c5038adf39447dc27a1e209dc4996a70b8f7bd21661e4b81124fc90d0d90d",
+    "candidate_pool_sha256": "dac57fa2ba2512997cb1f82822407cc8c6939ceba25ca2a54d4f701f7d9d54a8",
+    "clinician_beams_sha256": "4de80542cd206691d1acee0def8ac62982fc47cc7fe6679b4c4dd7c4659b226f",
+    "beam_metadata_sha256": "e9a4ffb8be2c52e8c033f23c77244bc5da13d3ba454c15e0a69f55c9395f3681",
+    "planner_beams_sha256": "79ecf21cf46dd6212c8fc69420bfec18ee02d293be066f78551502528a5971fc",
+    "ga_source_bundle_sha256": "b523d9e2e4fbbce4ce8c7bf8ce0bffcfce925a7b86e7d70a44d90ba5e9657c6b",
+    "portpy_version": "1.1.4",
+    "portpy_source_bundle_sha256": "93092fdc49800dd904c16054e750f5d2dc48ed9391361a0c5659e994e552a1c6"
+  },
+  "cache_identity_sha256": "7b832565d6529c2d01a2c6e47d5477d161646ad7aef1d6ff6b4083583b0ccc0b"
+}

@@ -1,0 +1,546 @@
+{
+  "expert": {
+    "beams": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "objective": 90.00246986238692,
+    "objective_terms": [
+      {
+        "config_index": 0,
+        "type": "quadratic-overdose",
+        "value": 14.212303902909937,
+        "structure_name": "PTV",
+        "weight": 10000,
+        "dose_gy": "prescription_gy"
+      },
+      {
+        "config_index": 2,
+        "type": "quadratic-underdose",
+        "value": 7.304645747060708,
+        "structure_name": "PTV",
+        "weight": 100000,
+        "dose_gy": "prescription_gy"
+      },
+      {
+        "config_index": 3,
+        "type": "quadratic",
+        "value": 1.2306061533806125,
+        "structure_name": "CORD",
+        "weight": 10
+      },
+      {
+        "config_index": 4,
+        "type": "quadratic",
+        "value": 23.65190167520488,
+        "structure_name": "ESOPHAGUS",
+        "weight": 20
+      },
+      {
+        "config_index": 5,
+        "type": "quadratic",
+        "value": 0.0,
+        "structure_name": "HEART",
+        "weight": 20
+      },
+      {
+        "config_index": 6,
+        "type": "quadratic",
+        "value": 8.856183669226048,
+        "structure_name": "LUNG_L",
+        "weight": 10
+      },
+      {
+        "config_index": 7,
+        "type": "quadratic",
+        "value": 0.4787886385181824,
+        "structure_name": "LUNG_R",
+        "weight": 10
+      },
+      {
+        "config_index": 8,
+        "type": "quadratic",
+        "value": 4.486343234681628,
+        "structure_name": "LUNGS_NOT_GTV",
+        "weight": 10
+      },
+      {
+        "config_index": 9,
+        "type": "quadratic",
+        "value": 14.992379402339145,
+        "structure_name": "RIND_0",
+        "weight": 5
+      },
+      {
+        "config_index": 10,
+        "type": "quadratic",
+        "value": 7.696237611575062,
+        "structure_name": "RIND_1",
+        "weight": 5
+      },
+      {
+        "config_index": 11,
+        "type": "quadratic",
+        "value": 1.2757888148947014,
+        "structure_name": "RIND_2",
+        "weight": 3
+      },
+      {
+        "config_index": 12,
+        "type": "quadratic",
+        "value": 0.7228999066297183,
+        "structure_name": "RIND_3",
+        "weight": 3
+      },
+      {
+        "config_index": 13,
+        "type": "quadratic",
+        "value": 0.26124792866665103,
+        "structure_name": "RIND_4",
+        "weight": 3
+      },
+      {
+        "config_index": 14,
+        "type": "smoothness-quadratic",
+        "value": 4.8331431772996565,
+        "weight": 100
+      }
+    ],
+    "A_shape": [
+      276082,
+      2255
+    ],
+    "downsampled": false,
+    "source_protocol_fingerprint": "4d3c5038adf39447dc27a1e209dc4996a70b8f7bd21661e4b81124fc90d0d90d",
+    "evaluation_resolution": "full_resolution",
+    "PTV_D95_Gy": 59.49004058879403,
+    "criteria": [
+      {
+        "label": "GTV max",
+        "value": 64.34368095476951,
+        "unit": "Gy",
+        "limit": 69,
+        "goal": 66,
+        "pass_limit": true,
+        "pass_goal": true
+      },
+      {
+        "label": "PTV max",
+        "value": 65.99999442657375,
+        "unit": "Gy",
+        "limit": 69,
+        "goal": 66,
+        "pass_limit": true,
+        "pass_goal": true
+      },
+      {
+        "label": "ESOPHAGUS max",
+        "value": 62.16684301422598,
+        "unit": "Gy",
+        "limit": 66,
+        "goal": null,
+        "pass_limit": true,
+        "pass_goal": null
+      },
+      {
+        "label": "ESOPHAGUS mean",
+        "value": 10.58444981428972,
+        "unit": "Gy",
+        "limit": 34,
+        "goal": 21,
+        "pass_limit": true,
+        "pass_goal": true
+      },
+      {
+        "label": "ESOPHAGUS V60Gy",
+        "value": 3.408103304096483,
+        "unit": "%",
+        "limit": 17,
+        "goal": null,
+        "pass_limit": true,
+        "pass_goal": null
+      },
+      {
+        "label": "HEART max",
+        "value": 0.0,
+        "unit": "Gy",
+        "limit": 66,
+        "goal": null,
+        "pass_limit": true,
+        "pass_goal": null
+      },
+      {
+        "label": "HEART mean",
+        "value": 0.0,
+        "unit": "Gy",
+        "limit": 27,
+        "goal": 20,
+        "pass_limit": true,
+        "pass_goal": true
+      },
+      {
+        "label": "HEART V30Gy",
+        "value": 0.0,
+        "unit": "%",
+        "limit": 50,
+        "goal": null,
+        "pass_limit": true,
+        "pass_goal": null
+      },
+      {
+        "label": "HEART V30Gy",
+        "value": 0.0,
+        "unit": "%",
+        "limit": null,
+        "goal": 48,
+        "pass_limit": null,
+        "pass_goal": true
+      },
+      {
+        "label": "LUNG_L max",
+        "value": 65.99999442657375,
+        "unit": "Gy",
+        "limit": 66,
+        "goal": null,
+        "pass_limit": true,
+        "pass_goal": null
+      },
+      {
+        "label": "LUNG_R max",
+        "value": 54.232048004410764,
+        "unit": "Gy",
+        "limit": 66,
+        "goal": null,
+        "pass_limit": true,
+        "pass_goal": null
+      },
+      {
+        "label": "CORD max",
+        "value": 30.295250985209282,
+        "unit": "Gy",
+        "limit": 50,
+        "goal": 48,
+        "pass_limit": true,
+        "pass_goal": true
+      },
+      {
+        "label": "SKIN max",
+        "value": 46.85642526691363,
+        "unit": "Gy",
+        "limit": 60,
+        "goal": null,
+        "pass_limit": true,
+        "pass_goal": null
+      },
+      {
+        "label": "LUNGS_NOT_GTV max",
+        "value": 65.99999442657375,
+        "unit": "Gy",
+        "limit": 66,
+        "goal": null,
+        "pass_limit": true,
+        "pass_goal": null
+      },
+      {
+        "label": "LUNGS_NOT_GTV mean",
+        "value": 7.300463340157374,
+        "unit": "Gy",
+        "limit": 21,
+        "goal": 20,
+        "pass_limit": true,
+        "pass_goal": true
+      },
+      {
+        "label": "LUNGS_NOT_GTV V20Gy",
+        "value": 13.770597854980386,
+        "unit": "%",
+        "limit": 37,
+        "goal": null,
+        "pass_limit": true,
+        "pass_goal": null
+      }
+    ],
+    "timing_schema": 2,
+    "setup_time_s": 8.4,
+    "solve_time_s": 30.0,
+    "total_time_s": 38.4,
+    "scored_time_s": 38.5
+  },
+  "GA": {
+    "beams": [
+      3,
+      5,
+      39,
+      48,
+      57,
+      63,
+      69
+    ],
+    "objective": 69.04601530871813,
+    "objective_terms": [
+      {
+        "config_index": 0,
+        "type": "quadratic-overdose",
+        "value": 4.779090414344082,
+        "structure_name": "PTV",
+        "weight": 10000,
+        "dose_gy": "prescription_gy"
+      },
+      {
+        "config_index": 2,
+        "type": "quadratic-underdose",
+        "value": 2.7168340925852883,
+        "structure_name": "PTV",
+        "weight": 100000,
+        "dose_gy": "prescription_gy"
+      },
+      {
+        "config_index": 3,
+        "type": "quadratic",
+        "value": 0.27131452037375287,
+        "structure_name": "CORD",
+        "weight": 10
+      },
+      {
+        "config_index": 4,
+        "type": "quadratic",
+        "value": 19.539857292341377,
+        "structure_name": "ESOPHAGUS",
+        "weight": 20
+      },
+      {
+        "config_index": 5,
+        "type": "quadratic",
+        "value": 0.0,
+        "structure_name": "HEART",
+        "weight": 20
+      },
+      {
+        "config_index": 6,
+        "type": "quadratic",
+        "value": 7.63496897468035,
+        "structure_name": "LUNG_L",
+        "weight": 10
+      },
+      {
+        "config_index": 7,
+        "type": "quadratic",
+        "value": 1.6495437724133482,
+        "structure_name": "LUNG_R",
+        "weight": 10
+      },
+      {
+        "config_index": 8,
+        "type": "quadratic",
+        "value": 4.484176304399018,
+        "structure_name": "LUNGS_NOT_GTV",
+        "weight": 10
+      },
+      {
+        "config_index": 9,
+        "type": "quadratic",
+        "value": 14.979398246198317,
+        "structure_name": "RIND_0",
+        "weight": 5
+      },
+      {
+        "config_index": 10,
+        "type": "quadratic",
+        "value": 7.852036975981627,
+        "structure_name": "RIND_1",
+        "weight": 5
+      },
+      {
+        "config_index": 11,
+        "type": "quadratic",
+        "value": 1.1775752253038054,
+        "structure_name": "RIND_2",
+        "weight": 3
+      },
+      {
+        "config_index": 12,
+        "type": "quadratic",
+        "value": 0.5716412056887824,
+        "structure_name": "RIND_3",
+        "weight": 3
+      },
+      {
+        "config_index": 13,
+        "type": "quadratic",
+        "value": 0.4186082090542519,
+        "structure_name": "RIND_4",
+        "weight": 3
+      },
+      {
+        "config_index": 14,
+        "type": "smoothness-quadratic",
+        "value": 2.9709700753541255,
+        "weight": 100
+      }
+    ],
+    "A_shape": [
+      276082,
+      2628
+    ],
+    "downsampled": false,
+    "source_protocol_fingerprint": "4d3c5038adf39447dc27a1e209dc4996a70b8f7bd21661e4b81124fc90d0d90d",
+    "evaluation_resolution": "full_resolution",
+    "PTV_D95_Gy": 59.7100501197371,
+    "criteria": [
+      {
+        "label": "GTV max",
+        "value": 62.95369733306236,
+        "unit": "Gy",
+        "limit": 69,
+        "goal": 66,
+        "pass_limit": true,
+        "pass_goal": true
+      },
+      {
+        "label": "PTV max",
+        "value": 63.6186132549964,
+        "unit": "Gy",
+        "limit": 69,
+        "goal": 66,
+        "pass_limit": true,
+        "pass_goal": true
+      },
+      {
+        "label": "ESOPHAGUS max",
+        "value": 62.10427717254638,
+        "unit": "Gy",
+        "limit": 66,
+        "goal": null,
+        "pass_limit": true,
+        "pass_goal": null
+      },
+      {
+        "label": "ESOPHAGUS mean",
+        "value": 8.896177719013732,
+        "unit": "Gy",
+        "limit": 34,
+        "goal": 21,
+        "pass_limit": true,
+        "pass_goal": true
+      },
+      {
+        "label": "ESOPHAGUS V60Gy",
+        "value": 4.352255862938507,
+        "unit": "%",
+        "limit": 17,
+        "goal": null,
+        "pass_limit": true,
+        "pass_goal": null
+      },
+      {
+        "label": "HEART max",
+        "value": 0.0,
+        "unit": "Gy",
+        "limit": 66,
+        "goal": null,
+        "pass_limit": true,
+        "pass_goal": null
+      },
+      {
+        "label": "HEART mean",
+        "value": 0.0,
+        "unit": "Gy",
+        "limit": 27,
+        "goal": 20,
+        "pass_limit": true,
+        "pass_goal": true
+      },
+      {
+        "label": "HEART V30Gy",
+        "value": 0.0,
+        "unit": "%",
+        "limit": 50,
+        "goal": null,
+        "pass_limit": true,
+        "pass_goal": null
+      },
+      {
+        "label": "HEART V30Gy",
+        "value": 0.0,
+        "unit": "%",
+        "limit": null,
+        "goal": 48,
+        "pass_limit": null,
+        "pass_goal": true
+      },
+      {
+        "label": "LUNG_L max",
+        "value": 63.6186132549964,
+        "unit": "Gy",
+        "limit": 66,
+        "goal": null,
+        "pass_limit": true,
+        "pass_goal": null
+      },
+      {
+        "label": "LUNG_R max",
+        "value": 55.45529323373515,
+        "unit": "Gy",
+        "limit": 66,
+        "goal": null,
+        "pass_limit": true,
+        "pass_goal": null
+      },
+      {
+        "label": "CORD max",
+        "value": 15.487694275994746,
+        "unit": "Gy",
+        "limit": 50,
+        "goal": 48,
+        "pass_limit": true,
+        "pass_goal": true
+      },
+      {
+        "label": "SKIN max",
+        "value": 47.888228846757706,
+        "unit": "Gy",
+        "limit": 60,
+        "goal": null,
+        "pass_limit": true,
+        "pass_goal": null
+      },
+      {
+        "label": "LUNGS_NOT_GTV max",
+        "value": 63.6186132549964,
+        "unit": "Gy",
+        "limit": 66,
+        "goal": null,
+        "pass_limit": true,
+        "pass_goal": null
+      },
+      {
+        "label": "LUNGS_NOT_GTV mean",
+        "value": 7.9871888139539005,
+        "unit": "Gy",
+        "limit": 21,
+        "goal": 20,
+        "pass_limit": true,
+        "pass_goal": true
+      },
+      {
+        "label": "LUNGS_NOT_GTV V20Gy",
+        "value": 15.705540835952506,
+        "unit": "%",
+        "limit": 37,
+        "goal": null,
+        "pass_limit": true,
+        "pass_goal": null
+      }
+    ],
+    "timing_schema": 2,
+    "setup_time_s": 8.2,
+    "solve_time_s": 26.5,
+    "total_time_s": 34.6,
+    "scored_time_s": 34.8,
+    "source_ga_result": "results/Lung_Patient_39/ga_runs/Lung_Patient_39_ga_downsampled_seed_0.json"
+  }
+}

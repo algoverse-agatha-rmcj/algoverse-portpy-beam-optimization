@@ -29,13 +29,24 @@ and the complete clinical-criteria table.
 
 ## Cohort
 
-The intended cohort is `Lung_Patient_2` through `Lung_Patient_20` **except
-`Lung_Patient_12` and `Lung_Patient_13`**, giving 17 patients. Every committed bundle is a
-seed-0 run at population 20 / 40 generations with the candidate pool resolved from each
-beam's real gantry angle, so all of them are directly comparable.
+The intended cohort is `Lung_Patient_2` through `Lung_Patient_41` **except
+`Lung_Patient_12`, `Lung_Patient_13` and `Lung_Patient_35`**, giving 37 patients. Every
+committed bundle is a seed-0 run at population 20 / 40 generations with the candidate pool
+resolved from each beam's real gantry angle, so all of them are directly comparable.
 
-Both exclusions are defects in the released data, not choices about method, and neither can
-be worked around from this repository.
+It was built in two stages: Patients 2-21 sequentially, then Patients 22-41 as three
+disjoint predeclared batches (`lung-seed0-ext-a-20260826`, `lung-seed0-ext-b2-20260827`,
+`lung-seed0-ext-c-20260826`) run concurrently on one machine. Of the 20 predeclared
+extension patients, 19 completed and one was excluded for the data defect below. Because
+the three batches ran at the same time, their `wall_time_s` and `solve_time_s` are not
+comparable with the sequentially-run Patients 2-21; cohort timing statistics stay on the
+sequential runs and the extension patients are reported for objectives only.
+
+All three exclusions are defects in the released data, not choices about method, and none
+can be worked around from this repository. `Lung_Patient_35` is the same defect as
+`Lung_Patient_13`: its structures reference voxel indices beyond its influence matrix, at
+full resolution and with the clinician's own `PlannerBeams`, so no plan can be built for it
+and no clinician baseline exists to compare against.
 
 Regenerate the cohort-level JSON and paper-ready Markdown summary from the authoritative
 full-resolution comparisons with:

@@ -1,0 +1,96 @@
+{
+  "batch_schema": 1,
+  "batch_id": "lung-seed0-ext-b2-20260827",
+  "created_at_utc": "2026-08-27T05:38:54+00:00",
+  "experiment_id": "portpy-lung-ga-seed0-primary-v1",
+  "patients_predeclared": [
+    "Lung_Patient_29",
+    "Lung_Patient_30",
+    "Lung_Patient_31",
+    "Lung_Patient_32",
+    "Lung_Patient_33",
+    "Lung_Patient_34",
+    "Lung_Patient_35"
+  ],
+  "scientific_config": {
+    "protocol_name": "Lung_2Gy_30Fx",
+    "beam_count": 7,
+    "population": 20,
+    "generations": 40,
+    "mutation_rate": 0.15,
+    "seed": 0,
+    "candidate_grid_step_deg": 15.0,
+    "excluded_gantry_deg": [
+      180.0
+    ],
+    "search_resolution": "downsampled",
+    "downsample_voxel_factors": [
+      6,
+      6,
+      1
+    ],
+    "downsample_beamlet_factor": 4,
+    "final_evaluation_resolution": "full_resolution"
+  },
+  "scientific_config_sha256": "4d3c5038adf39447dc27a1e209dc4996a70b8f7bd21661e4b81124fc90d0d90d",
+  "code_provenance": {
+    "git_commit": "bfaafb8207af05d50a7672dfa98322a6ef9546da",
+    "git_dirty": true,
+    "source_files_sha256": {
+      "ga_bao.py": "5860b35ab24073e2e555a0bd8ef8152340bbaba4f1e6490fe533666f2e0fce75",
+      "scripts/beam_angles.py": "284aac8166632ba9d3a59cc3385ef126f7715174a753cdcdfff3a29761ca1ab4",
+      "scripts/experiment_protocol.py": "5a5472b0b350e4bf26d1ff4bf1e3ef3ae6831a4d135379b42fd926fbc015e9e2",
+      "scripts/clinical_compare.py": "9c3e02f531db619c5af70c586dc709a260c1a31fe71f3706ebc2c7690783e2a0",
+      "scripts/objective_terms.py": "4242b32f525795a579dd758ab127926dd1da606b0de14f13ef6f2e0ba180818f",
+      "scripts/plot_dvh.py": "af7b213da8350a7c7f5740d30377c90d106a9d06a043be038d0b067ab1da5748",
+      "scripts/run_patient_batch.py": "26440276c4bb280e39657568183e2f4755ca00be2ac95dca31719abcd1d3533f",
+      "scripts/timing.py": "0451921731459087aa01da2603a5ec215e260d51075608b8fd4ca28c9b51e813"
+    },
+    "source_bundle_sha256": "e6ebfec40d4355bc05527e0d0311686e9dffe51c95b95cf3fd994f66a0bb6c06",
+    "ga_source_bundle_sha256": "b523d9e2e4fbbce4ce8c7bf8ce0bffcfce925a7b86e7d70a44d90ba5e9657c6b",
+    "portpy_source_files_sha256": {
+      "photon/influence_matrix.py": "6fa4126b67560944ae7fa82ac02314fef411cc1ef2eb4ce9ff8aae08949a46f7",
+      "photon/optimization.py": "0e429e7deefdb9111560977b77a77b62f1535ee80dc99d8c530fc7991d7d0c2b"
+    },
+    "portpy_source_bundle_sha256": "93092fdc49800dd904c16054e750f5d2dc48ed9391361a0c5659e994e552a1c6",
+    "python_version": "3.11.16",
+    "packages": {
+      "portpy": "1.1.4",
+      "numpy": "2.4.6",
+      "cvxpy": "1.7.5",
+      "mosek": "11.2.2"
+    }
+  },
+  "patients": {
+    "Lung_Patient_29": {
+      "status": "completed",
+      "updated_at_utc": "2026-08-27T05:41:25+00:00"
+    },
+    "Lung_Patient_30": {
+      "status": "completed",
+      "updated_at_utc": "2026-08-27T05:43:54+00:00"
+    },
+    "Lung_Patient_31": {
+      "status": "completed",
+      "updated_at_utc": "2026-08-27T06:59:29+00:00"
+    },
+    "Lung_Patient_32": {
+      "status": "completed",
+      "updated_at_utc": "2026-08-27T07:40:57+00:00"
+    },
+    "Lung_Patient_33": {
+      "status": "completed",
+      "updated_at_utc": "2026-08-27T08:16:26+00:00"
+    },
+    "Lung_Patient_34": {
+      "status": "completed",
+      "updated_at_utc": "2026-08-27T08:57:05+00:00"
+    },
+    "Lung_Patient_35": {
+      "status": "failed",
+      "updated_at_utc": "2026-08-27T09:00:25+00:00",
+      "error": "CalledProcessError: Command '['/Users/milen/dev/projects/research/portpy-venv/bin/python', 'ga_bao.py', '--patient', 'Lung_Patient_35', '--k', '7', '--pop', '20', '--gens', '40', '--mutation-rate', '0.15', '--seed', '0']' returned non-zero exit status 1."
+    }
+  },
+  "completed_at_utc": "2026-08-27T09:00:25+00:00"
+}
