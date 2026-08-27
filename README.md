@@ -8,8 +8,43 @@ radiotherapy beam-angle optimization by testing a genetic algorithm on open-sour
 
 Experiment outputs are organized by patient under [`results/`](results/). Each completed
 patient bundle keeps the GA result JSON, clinician comparison metrics, and its
-dose-volume histogram (DVH) together. Complete seed-0 bundles are committed for
-[`Lung_Patient_2` through `Lung_Patient_6`](results/).
+dose-volume histogram (DVH) together. The matched primary cohort contains 18
+seed-0 patients: Patients 2-11 and 14-21. Patients 12 and 13 are excluded because
+their upstream PortPy data cannot produce comparable complete results.
+
+## Frozen primary cohort and safe batching
+
+The primary cohort protocol is frozen in
+[`scripts/experiment_protocol.py`](scripts/experiment_protocol.py): 7 beams,
+population 20, 40 generations, mutation rate 0.15, seed 0, a real-angle 15-degree
+candidate grid with 180 degrees excluded, the existing `(6, 6, 1)` / `4`
+downsampling recipe, and full-resolution rescoring of both plans.
+
+The safeguards are passive: manifests, hashes, and validation do not expose the GA
+to more patient data, evaluations, seeds, or search time. New results may record
+corrected solver timing and objective-term detail, but combined old-plus-new cohort
+analysis must use only the fields shared by both generations of artifacts. Never run
+several seeds and select the best one for the primary cohort.
+
+Launch a cohort extension through the batch runner with a stable, descriptive ID:
+
+```bash
+../portpy-venv/bin/python scripts/run_patient_batch.py \
+  --batch-id lung-seed0-extension-20260826 \
+  Lung_Patient_22 Lung_Patient_23 Lung_Patient_24
+```
+
+Before the first download, the runner writes `results/batches/<batch-id>.json` with
+the exact predeclared patient list, frozen protocol, code hashes, and per-patient
+status. Future GA results embed patient/configuration/data/code provenance. GA caches
+are named by that identity and are rejected if any identity field differs; older
+unidentified caches are never silently reused. A repeat-seed study is a separate
+experiment and must use separate output files and analysis.
+
+The completed one-patient integration test is the **Algoverse Patient 21 protocol-lock
+pilot**, batch ID `lung-seed0-pilot-20260826-v2`. Read
+[`docs/large_batch_handoff.md`](docs/large_batch_handoff.md) before launching the next
+extension.
 
 ## Beam IDs do not encode gantry angles
 
@@ -40,7 +75,7 @@ reads each beam's real `gantry_angle` from its `MetaData.json`. `grid_pool()` re
 15° grid by matching angle values, and `excluded_ids()` finds the 180° beam whatever its ID.
 Only the small metadata files are fetched, so the pool is chosen before committing to a
 multi-gigabyte download. GA result JSONs now also record `pool_gantry_deg` and
-`best_gantry_deg` so no reader has to infer the convention.
+`best_gantry_deg`; new runs additionally embed the exact pool in their protocol manifest.
 
 Never reintroduce `range(0, 72, 3)`, a literal beam `36`, or `beam_id * 5`.
 `tests/test_beam_angles.py` guards this, including a regression case built from the real

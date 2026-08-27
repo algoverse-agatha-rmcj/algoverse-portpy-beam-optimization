@@ -106,17 +106,22 @@ C:\Users\jpwun\anaconda3\envs\portpy\python.exe ga_bao.py --patient Lung_Patient
 
 ## Stopping, resuming, sleeping
 - Press **Ctrl+C** to stop anytime.
-- Re-running the same command **resumes**: it reloads the matching `.cache.json` from the
-  patient's `cache/` folder and continues, wasting no compute.
+- Re-running the same command **resumes**: it reloads a protocol-fingerprinted
+  `.cache.json` from the patient's `cache/` folder and continues, wasting no compute.
+  A cache from another patient, configuration, dataset revision, or code version is
+  rejected rather than silently reused. Legacy caches without an identity are not reused.
 - If the laptop sleeps mid-run, it picks back up on wake.
 
 ## The knobs you change in the command
-- `--pop` and `--gens` — how hard it searches (and how long it runs). 20 × 40 is a solid real run; 6 × 3 is a quick test. Thorough: 30 × 60 with ~5 seeds.
-- `--pool` — the candidate beam IDs. The default is every third beam from 0..69 with
-  beam 36 (180°) removed because PortPy does not model the treatment couch. Any missing
-  clinician beams are added automatically so the comparison remains fair.
+- `--pop` and `--gens` — how hard it searches (and how long it runs). The primary cohort
+  is frozen at 20 × 40. A 6 × 3 run is only a software sanity check; 30 × 60 belongs in a
+  separately reported experiment and must not be pooled with the primary cohort.
+- `--pool` — the candidate beam IDs. By default, the code reads each patient's real
+  gantry-angle metadata, selects the 15-degree grid, excludes every beam at 180 degrees,
+  and adds missing non-180 clinician beams. Beam IDs do not encode angles.
 - `--k` — how many beams to select (7 matches the PortPy benchmark).
-- `--seed` — random seed; change it for an independent run (report mean ± std over several seeds).
+- `--seed` — random seed. Seed 0 is the primary cohort. Additional seeds form a separate
+  robustness study; summarize all predeclared seeds rather than selecting their best result.
 - `--no-downsample` — use full-resolution matrices (slower per solve; for comparing against the expert plan, not the MILP).
 - `--out` — optional results filename; by default it is organized under
   `results/<patient>/ga_runs/` and includes the resolution and seed.

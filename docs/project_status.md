@@ -1,6 +1,6 @@
 # Project status and unfinished work
 
-Updated 2026-08-21. This is the repository backlog; meeting transcripts and Slack determine
+Updated 2026-08-26. This is the repository backlog; meeting transcripts and Slack determine
 individual ownership.
 
 ## Completed
@@ -19,8 +19,19 @@ individual ownership.
   angles from Patient 11 onward. See the README section "Beam IDs do not encode gantry
   angles"; guarded by `tests/test_beam_angles.py`.
 - The pipeline accepts any patient in the catalogue, not only Patients 3-6.
-- The matched seed-0 cohort now contains 17 usable patients (Patients 2-11 and 14-20),
+- The matched seed-0 cohort now contains 18 usable patients (Patients 2-11 and 14-21),
   with Patients 12 and 13 excluded for documented upstream data defects.
+- The Algoverse Patient 21 protocol-lock pilot, batch ID
+  `lung-seed0-pilot-20260826-v2`, completed the 40-generation GA, both clinical
+  comparisons, DVH generation, bundle validation, and raw-data cleanup. Its reduced
+  resolution result was 1.18 percent better than the clinician, while its full-resolution
+  objective was 4.29 percent worse. Full-resolution results remain the clinical source of
+  truth. See `docs/large_batch_handoff.md` for the exact handoff.
+- Future cohort extensions use a frozen primary protocol, a predeclared patient-list
+  manifest, exact candidate-pool validation, run/data/code provenance, and
+  protocol-fingerprinted caches. These safeguards only record or reject state; they do not
+  give new patients more optimizer data, attempts, or compute. Corrected timing and
+  objective-term exports remain new-only analysis fields unless old cases are re-solved.
 - `scripts/analyze_cohort.py` regenerates the cohort evidence from the authoritative
   full-resolution comparisons using arithmetic means and explicit outlier disclosure.
 - `scripts/generate_paper_assets.py` regenerates the manuscript cohort table and vector
