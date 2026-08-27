@@ -464,6 +464,15 @@ def _focused_delta(row: dict[str, Any], label: str) -> str:
 
 def render_markdown(summary: dict[str, Any]) -> str:
     cohort = summary["cohort"]
+    priorities = summary["review_priorities"]
+    focused_losses = [
+        row for row in priorities["focused_patients"]
+        if row["review_reason"] == "GA loss"
+    ]
+    largest_loss_d95_change = max(
+        (abs(row["ptv_d95_delta_gy"]) for row in focused_losses),
+        default=0.0,
+    )
     lines = [
         "# Cohort analysis",
         "",
@@ -559,7 +568,6 @@ def render_markdown(summary: dict[str, Any]) -> str:
             timing["inconsistencies"]
         ) + ".")
 
-    priorities = summary["review_priorities"]
     largest = priorities["largest_absolute_objective_changes"]
     lines.extend([
         "",
@@ -580,7 +588,7 @@ def render_markdown(summary: dict[str, Any]) -> str:
         "",
         "## Focused loss and outlier analysis",
         "",
-        "The five losses are small and the two largest gains are shown alongside them. "
+        f"The {len(focused_losses)} losses and the two largest gains are shown together. "
         "Clinical deltas are GA minus expert; units are Gy except V20, which is in "
         "percentage points.",
         "",
@@ -604,9 +612,9 @@ def render_markdown(summary: dict[str, Any]) -> str:
         )
     lines.extend([
         "",
-        f"Across the five loss cases, mean objective improvement is "
-        f"{priorities['mean_loss_pct']:+.2f}% (that is, a small mean disadvantage). "
-        "Their PTV D95 changes stay within 0.03 Gy of the expert plans. P14 and P17 "
+        f"Across the {len(focused_losses)} loss cases, mean objective improvement is "
+        f"{priorities['mean_loss_pct']:+.2f}%. Their largest absolute PTV D95 change is "
+        f"{largest_loss_d95_change:.2f} Gy. P14 and P17 "
         "instead recover 1.24 Gy and 1.46 Gy of PTV D95, respectively; those coverage "
         "changes coincide with the two largest objective gains, but objective-term "
         "exports are needed before attributing causality.",

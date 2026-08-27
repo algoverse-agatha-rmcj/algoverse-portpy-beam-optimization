@@ -6,7 +6,7 @@
     "clinical_delta": "GA - expert; positive means higher dose/volume under GA"
   },
   "cohort": {
-    "n_patients": 17,
+    "n_patients": 18,
     "patients": [
       "Lung_Patient_2",
       "Lung_Patient_3",
@@ -24,19 +24,20 @@
       "Lung_Patient_17",
       "Lung_Patient_18",
       "Lung_Patient_19",
-      "Lung_Patient_20"
+      "Lung_Patient_20",
+      "Lung_Patient_21"
     ],
     "wins": 12,
-    "losses": 5,
+    "losses": 6,
     "ties": 0,
-    "mean_objective_improvement_pct": 10.13778,
-    "mean_objective_improvement_excluding_two_largest_gains_pct": 4.881758,
-    "expert_mean_objective": 101.6712,
-    "ga_mean_objective": 82.803768,
-    "expert_mean_ptv_d95_gy": 59.483407,
-    "ga_mean_ptv_d95_gy": 59.667089,
-    "expert_limit_violations": 1,
-    "ga_limit_violations": 0
+    "mean_objective_improvement_pct": 9.336108,
+    "mean_objective_improvement_excluding_two_largest_gains_pct": 4.308378,
+    "expert_mean_objective": 105.602447,
+    "ga_mean_objective": 88.194396,
+    "expert_mean_ptv_d95_gy": 59.484436,
+    "ga_mean_ptv_d95_gy": 59.65372,
+    "expert_limit_violations": 2,
+    "ga_limit_violations": 1
   },
   "patients": [
     {
@@ -310,216 +311,233 @@
       "ga_limit_violations": 0,
       "wall_time_s": 5299.8,
       "wall_time_scope": "full_run"
+    },
+    {
+      "patient": "Lung_Patient_21",
+      "patient_number": 21,
+      "ga_plan_key": "GA",
+      "expert_objective": 172.433647,
+      "ga_objective": 179.835072,
+      "objective_improvement_pct": -4.292333,
+      "outcome": "loss",
+      "expert_ptv_d95_gy": 59.501936,
+      "ga_ptv_d95_gy": 59.42644,
+      "ptv_d95_delta_gy": -0.075497,
+      "expert_limit_violations": 1,
+      "ga_limit_violations": 1,
+      "wall_time_s": 9673.4,
+      "wall_time_scope": "full_run"
     }
   ],
   "clinical_criteria": [
     {
       "label": "GTV max",
       "unit": "Gy",
-      "n_patients": 17,
+      "n_patients": 18,
       "missing_patients": [],
-      "expert_mean": 63.674692,
-      "ga_mean": 62.818224,
-      "mean_delta_ga_minus_expert": -0.856468,
+      "expert_mean": 63.717374,
+      "ga_mean": 62.94397,
+      "mean_delta_ga_minus_expert": -0.773404,
       "ga_lower_n": 15,
-      "ga_higher_n": 2,
+      "ga_higher_n": 3,
       "equal_n": 0
     },
     {
       "label": "PTV max",
       "unit": "Gy",
-      "n_patients": 17,
+      "n_patients": 18,
       "missing_patients": [],
-      "expert_mean": 65.317717,
-      "ga_mean": 64.454835,
-      "mean_delta_ga_minus_expert": -0.862882,
-      "ga_lower_n": 15,
+      "expert_mean": 65.331412,
+      "ga_mean": 64.512233,
+      "mean_delta_ga_minus_expert": -0.819179,
+      "ga_lower_n": 16,
       "ga_higher_n": 2,
       "equal_n": 0
     },
     {
       "label": "ESOPHAGUS max",
       "unit": "Gy",
-      "n_patients": 17,
+      "n_patients": 18,
       "missing_patients": [],
-      "expert_mean": 44.857947,
-      "ga_mean": 44.207637,
-      "mean_delta_ga_minus_expert": -0.65031,
+      "expert_mean": 45.844375,
+      "ga_mean": 45.265106,
+      "mean_delta_ga_minus_expert": -0.579269,
       "ga_lower_n": 12,
-      "ga_higher_n": 5,
+      "ga_higher_n": 6,
       "equal_n": 0
     },
     {
       "label": "ESOPHAGUS mean",
       "unit": "Gy",
-      "n_patients": 17,
+      "n_patients": 18,
       "missing_patients": [],
-      "expert_mean": 8.954365,
-      "ga_mean": 8.454382,
-      "mean_delta_ga_minus_expert": -0.499983,
+      "expert_mean": 9.823593,
+      "ga_mean": 9.368109,
+      "mean_delta_ga_minus_expert": -0.455484,
       "ga_lower_n": 11,
-      "ga_higher_n": 6,
+      "ga_higher_n": 7,
       "equal_n": 0
     },
     {
       "label": "ESOPHAGUS V60Gy",
       "unit": "%",
-      "n_patients": 17,
+      "n_patients": 18,
       "missing_patients": [],
-      "expert_mean": 4.069145,
-      "ga_mean": 3.573337,
-      "mean_delta_ga_minus_expert": -0.495808,
+      "expert_mean": 4.977563,
+      "ga_mean": 4.620849,
+      "mean_delta_ga_minus_expert": -0.356714,
       "ga_lower_n": 6,
-      "ga_higher_n": 4,
+      "ga_higher_n": 5,
       "equal_n": 7
     },
     {
       "label": "HEART max",
       "unit": "Gy",
-      "n_patients": 16,
+      "n_patients": 17,
       "missing_patients": [
         "Lung_Patient_8"
       ],
-      "expert_mean": 32.697593,
-      "ga_mean": 31.116697,
-      "mean_delta_ga_minus_expert": -1.580896,
-      "ga_lower_n": 8,
+      "expert_mean": 34.495852,
+      "ga_mean": 32.949567,
+      "mean_delta_ga_minus_expert": -1.546285,
+      "ga_lower_n": 9,
       "ga_higher_n": 4,
       "equal_n": 4
     },
     {
       "label": "HEART mean",
       "unit": "Gy",
-      "n_patients": 16,
+      "n_patients": 17,
       "missing_patients": [
         "Lung_Patient_8"
       ],
-      "expert_mean": 5.179591,
-      "ga_mean": 4.642349,
-      "mean_delta_ga_minus_expert": -0.537241,
-      "ga_lower_n": 10,
+      "expert_mean": 5.144307,
+      "ga_mean": 4.604419,
+      "mean_delta_ga_minus_expert": -0.539889,
+      "ga_lower_n": 11,
       "ga_higher_n": 2,
       "equal_n": 4
     },
     {
       "label": "HEART V30Gy",
       "unit": "%",
-      "n_patients": 16,
+      "n_patients": 17,
       "missing_patients": [
         "Lung_Patient_8"
       ],
-      "expert_mean": 3.980027,
-      "ga_mean": 3.093016,
-      "mean_delta_ga_minus_expert": -0.88701,
+      "expert_mean": 3.944673,
+      "ga_mean": 3.11578,
+      "mean_delta_ga_minus_expert": -0.828893,
       "ga_lower_n": 6,
-      "ga_higher_n": 3,
+      "ga_higher_n": 4,
       "equal_n": 7
     },
     {
       "label": "LUNG_L max",
       "unit": "Gy",
-      "n_patients": 17,
+      "n_patients": 18,
       "missing_patients": [],
-      "expert_mean": 33.161087,
-      "ga_mean": 42.173965,
-      "mean_delta_ga_minus_expert": 9.012878,
-      "ga_lower_n": 4,
+      "expert_mean": 34.819234,
+      "ga_mean": 43.311639,
+      "mean_delta_ga_minus_expert": 8.492406,
+      "ga_lower_n": 5,
       "ga_higher_n": 13,
       "equal_n": 0
     },
     {
       "label": "LUNG_R max",
       "unit": "Gy",
-      "n_patients": 17,
+      "n_patients": 18,
       "missing_patients": [],
-      "expert_mean": 58.647103,
-      "ga_mean": 59.116245,
-      "mean_delta_ga_minus_expert": 0.469142,
+      "expert_mean": 59.012285,
+      "ga_mean": 59.470231,
+      "mean_delta_ga_minus_expert": 0.457946,
       "ga_lower_n": 12,
-      "ga_higher_n": 5,
+      "ga_higher_n": 6,
       "equal_n": 0
     },
     {
       "label": "CORD max",
       "unit": "Gy",
-      "n_patients": 17,
+      "n_patients": 18,
       "missing_patients": [],
-      "expert_mean": 30.427227,
-      "ga_mean": 30.371103,
-      "mean_delta_ga_minus_expert": -0.056124,
+      "expert_mean": 31.514603,
+      "ga_mean": 31.461597,
+      "mean_delta_ga_minus_expert": -0.053006,
       "ga_lower_n": 7,
-      "ga_higher_n": 10,
+      "ga_higher_n": 11,
       "equal_n": 0
     },
     {
       "label": "SKIN max",
       "unit": "Gy",
-      "n_patients": 17,
+      "n_patients": 18,
       "missing_patients": [],
-      "expert_mean": 48.646891,
-      "ga_mean": 47.862068,
-      "mean_delta_ga_minus_expert": -0.784823,
-      "ga_lower_n": 11,
+      "expert_mean": 48.722648,
+      "ga_mean": 47.812564,
+      "mean_delta_ga_minus_expert": -0.910084,
+      "ga_lower_n": 12,
       "ga_higher_n": 6,
       "equal_n": 0
     },
     {
       "label": "LUNGS_NOT_GTV max",
       "unit": "Gy",
-      "n_patients": 17,
+      "n_patients": 18,
       "missing_patients": [],
-      "expert_mean": 64.79732,
-      "ga_mean": 64.130825,
-      "mean_delta_ga_minus_expert": -0.666495,
+      "expert_mean": 64.820824,
+      "ga_mean": 64.206224,
+      "mean_delta_ga_minus_expert": -0.6146,
       "ga_lower_n": 13,
-      "ga_higher_n": 4,
+      "ga_higher_n": 5,
       "equal_n": 0
     },
     {
       "label": "LUNGS_NOT_GTV mean",
       "unit": "Gy",
-      "n_patients": 17,
+      "n_patients": 18,
       "missing_patients": [],
-      "expert_mean": 8.273272,
-      "ga_mean": 8.541641,
-      "mean_delta_ga_minus_expert": 0.268369,
+      "expert_mean": 8.485937,
+      "ga_mean": 8.74851,
+      "mean_delta_ga_minus_expert": 0.262572,
       "ga_lower_n": 5,
-      "ga_higher_n": 12,
+      "ga_higher_n": 13,
       "equal_n": 0
     },
     {
       "label": "LUNGS_NOT_GTV V20Gy",
       "unit": "%",
-      "n_patients": 17,
+      "n_patients": 18,
       "missing_patients": [],
-      "expert_mean": 15.235818,
-      "ga_mean": 15.203142,
-      "mean_delta_ga_minus_expert": -0.032677,
+      "expert_mean": 15.721627,
+      "ga_mean": 15.940843,
+      "mean_delta_ga_minus_expert": 0.219217,
       "ga_lower_n": 9,
-      "ga_higher_n": 8,
+      "ga_higher_n": 9,
       "equal_n": 0
     }
   ],
   "timing": {
-    "patients_with_full_run_wall_time": 16,
-    "mean_full_run_ga_wall_time_s": 5117.70625,
+    "patients_with_full_run_wall_time": 17,
+    "mean_full_run_ga_wall_time_s": 5385.688235,
     "resumed_wall_time_patients": [
       "Lung_Patient_11"
     ],
     "unknown_wall_time_patients": [],
-    "patients_with_per_solve_timing": 6,
+    "patients_with_per_solve_timing": 7,
     "per_solve_timing_patients": [
       "Lung_Patient_7",
       "Lung_Patient_8",
       "Lung_Patient_9",
       "Lung_Patient_10",
       "Lung_Patient_11",
-      "Lung_Patient_14"
+      "Lung_Patient_14",
+      "Lung_Patient_21"
     ],
-    "measured_solves": 4224,
-    "pooled_mean_s": 6.120147,
-    "largest_reported_p95_s": 12.517,
-    "largest_reported_max_s": 17.032,
+    "measured_solves": 4937,
+    "pooled_mean_s": 7.084707,
+    "largest_reported_p95_s": 14.437,
+    "largest_reported_max_s": 18.439,
     "inconsistencies": []
   },
   "review_priorities": {
@@ -528,9 +546,10 @@
       "Lung_Patient_7",
       "Lung_Patient_9",
       "Lung_Patient_10",
-      "Lung_Patient_15"
+      "Lung_Patient_15",
+      "Lung_Patient_21"
     ],
-    "mean_loss_pct": -0.943675,
+    "mean_loss_pct": -1.501784,
     "focused_patients": [
       {
         "patient": "Lung_Patient_6",
@@ -819,6 +838,64 @@
             "expert": 23.185927,
             "ga": 23.212986,
             "delta_ga_minus_expert": 0.027059
+          }
+        ]
+      },
+      {
+        "patient": "Lung_Patient_21",
+        "review_reason": "GA loss",
+        "outcome": "loss",
+        "objective_improvement_pct": -4.292333,
+        "ptv_d95_delta_gy": -0.075497,
+        "clinical_deltas": [
+          {
+            "label": "GTV max",
+            "unit": "Gy",
+            "expert": 64.442979,
+            "ga": 65.081655,
+            "delta_ga_minus_expert": 0.638676
+          },
+          {
+            "label": "PTV max",
+            "unit": "Gy",
+            "expert": 65.564229,
+            "ga": 65.487999,
+            "delta_ga_minus_expert": -0.07623
+          },
+          {
+            "label": "ESOPHAGUS mean",
+            "unit": "Gy",
+            "expert": 24.600473,
+            "ga": 24.901468,
+            "delta_ga_minus_expert": 0.300995
+          },
+          {
+            "label": "HEART mean",
+            "unit": "Gy",
+            "expert": 4.579775,
+            "ga": 3.99753,
+            "delta_ga_minus_expert": -0.582245
+          },
+          {
+            "label": "LUNG_L max",
+            "unit": "Gy",
+            "expert": 63.007728,
+            "ga": 62.652101,
+            "delta_ga_minus_expert": -0.355627
+          },
+          {
+            "label": "LUNGS_NOT_GTV mean",
+            "unit": "Gy",
+            "expert": 12.101245,
+            "ga": 12.265283,
+            "delta_ga_minus_expert": 0.164038
+          },
+          {
+            "label": "LUNGS_NOT_GTV V20Gy",
+            "unit": "%",
+            "expert": 23.980366,
+            "ga": 28.481773,
+            "delta_ga_minus_expert": 4.501406
           }
         ]
       },

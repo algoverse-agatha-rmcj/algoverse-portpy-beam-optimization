@@ -160,6 +160,7 @@ def _nice_axis(values: list[float]) -> tuple[float, float, list[float]]:
 
 def render_svg(summary: dict[str, Any]) -> str:
     patients = summary["patients"]
+    cohort = summary["cohort"]
     values = [row["objective_improvement_pct"] for row in patients]
     axis_low, axis_high, ticks = _nice_axis(values)
     width, height = 900, 650
@@ -181,8 +182,9 @@ def render_svg(summary: dict[str, Any]) -> str:
         'aria-labelledby="title description">',
         '<title id="title">Per-patient full-resolution objective improvement</title>',
         '<desc id="description">Horizontal bars show the percentage objective '
-        'improvement for 17 lung patients. Positive values favor the genetic algorithm. '
-        'Twelve values are positive and five are negative.</desc>',
+        f'improvement for {cohort["n_patients"]} lung patients. Positive values favor '
+        f'the genetic algorithm. {cohort["wins"]} values are positive and '
+        f'{cohort["losses"]} are negative.</desc>',
         '<style>',
         'text{font-family:Arial,Helvetica,sans-serif;fill:#222}',
         '.tick{font-size:12px}.patient{font-size:13px}.value{font-size:12px;font-weight:600}',

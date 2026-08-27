@@ -2,11 +2,21 @@ import json
 import unittest
 from pathlib import Path
 
+from scripts.experiment_protocol import primary_config_mismatches
+
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 class CommittedResultTests(unittest.TestCase):
+    def test_all_committed_seed_zero_results_match_frozen_primary_protocol(self):
+        ga_paths = sorted(ROOT.glob("results/*/ga_runs/*_ga_downsampled_seed_0.json"))
+        self.assertEqual(len(ga_paths), 18)
+        for ga_path in ga_paths:
+            with self.subTest(path=ga_path):
+                ga = json.loads(ga_path.read_text())
+                self.assertEqual(primary_config_mismatches(ga), [])
+
     def test_solve_time_summaries_use_mean_not_median(self):
         ga_paths = ROOT.glob("results/*/ga_runs/*_ga_downsampled_seed_0.json")
         summaries = []

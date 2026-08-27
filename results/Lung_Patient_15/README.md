@@ -18,7 +18,7 @@ metrics and DVH.
 | Down-sampled objective | 91.8674 | 91.8850 |
 | Full-resolution objective | 64.3553 | 64.5936 |
 | Full-resolution PTV D95 | 59.74 Gy | 59.74 Gy |
-| Full-resolution solve time | 143.6 s | 143.6 s |
+| Full-resolution pipeline time (setup + solve) | 143.6 s | 143.6 s |
 
 GA search: best fitness 85.9924, 727 unique solves,
 325.6 minutes wall time. Organ-specific conclusions must use the

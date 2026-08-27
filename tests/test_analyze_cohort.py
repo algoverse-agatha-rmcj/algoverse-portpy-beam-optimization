@@ -76,28 +76,28 @@ class CohortAnalysisTests(unittest.TestCase):
 
     def test_current_committed_cohort_is_complete(self):
         summary = summarize(load_cohort(ROOT / "results"))
-        self.assertEqual(summary["cohort"]["n_patients"], 17)
+        self.assertEqual(summary["cohort"]["n_patients"], 18)
         self.assertEqual(summary["cohort"]["wins"], 12)
-        self.assertEqual(summary["cohort"]["losses"], 5)
+        self.assertEqual(summary["cohort"]["losses"], 6)
         self.assertAlmostEqual(
-            summary["cohort"]["mean_objective_improvement_pct"], 10.13778, places=6
+            summary["cohort"]["mean_objective_improvement_pct"], 9.336108, places=6
         )
         self.assertAlmostEqual(
             summary["cohort"][
                 "mean_objective_improvement_excluding_two_largest_gains_pct"
             ],
-            4.881758,
+            4.308378,
             places=6,
         )
         self.assertEqual(
-            len(summary["review_priorities"]["focused_patients"]), 7
+            len(summary["review_priorities"]["focused_patients"]), 8
         )
         self.assertEqual(
             summary["timing"]["resumed_wall_time_patients"],
             ["Lung_Patient_11"],
         )
         self.assertEqual(
-            summary["timing"]["patients_with_full_run_wall_time"], 16
+            summary["timing"]["patients_with_full_run_wall_time"], 17
         )
         markdown = render_markdown(summary)
         self.assertIn("All aggregate values are arithmetic means", markdown)
