@@ -15,6 +15,6 @@ and writes:
 
 Suggested figure caption: **Full-resolution planning-objective improvement for each patient.**
 Positive values indicate a lower objective under the genetic-algorithm beam arrangement.
-The GA produced a lower objective for 12 of 18 patients, with an arithmetic mean improvement
-of 9.34%. Patients 14 and 17 are the two largest gains; the arithmetic mean is 4.31% when
+The GA produced a lower objective for 30 of 37 patients, with an arithmetic mean improvement
+of 12.14%. Patients 14 and 38 are the two largest gains; the arithmetic mean is 9.46% when
 both are excluded as a sensitivity calculation.

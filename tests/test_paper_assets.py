@@ -18,18 +18,18 @@ class PaperAssetTests(unittest.TestCase):
     def test_table_uses_verified_mean_values(self):
         rows = list(csv.DictReader(io.StringIO(render_csv(self.summary))))
         left_lung = next(row for row in rows if row["metric"] == "Left-lung maximum")
-        self.assertAlmostEqual(float(left_lung["delta"]), 8.492406, places=6)
+        self.assertAlmostEqual(float(left_lung["delta"]), 6.346295, places=6)
         self.assertNotIn("median", render_latex(self.summary).lower())
-        self.assertIn("12/18", render_latex(self.summary))
-        self.assertIn("9.34\\%", render_latex(self.summary))
+        self.assertIn("30/37", render_latex(self.summary))
+        self.assertIn("12.14\\%", render_latex(self.summary))
 
     def test_svg_contains_every_patient_and_outlier_labels(self):
         svg = render_svg(self.summary)
-        self.assertEqual(svg.count('<rect class="win"'), 13)  # 12 bars + legend
-        self.assertEqual(svg.count('<rect class="loss"'), 7)  # 6 bars + legend
+        self.assertEqual(svg.count('<rect class="win"'), 31)  # 30 bars + legend
+        self.assertEqual(svg.count('<rect class="loss"'), 8)  # 7 bars + legend
         self.assertIn(">P14</text>", svg)
         self.assertIn(">P17</text>", svg)
-        self.assertIn("Mean 9.34%", svg)
+        self.assertIn("Mean 12.14%", svg)
 
 
 if __name__ == "__main__":

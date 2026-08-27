@@ -76,28 +76,28 @@ class CohortAnalysisTests(unittest.TestCase):
 
     def test_current_committed_cohort_is_complete(self):
         summary = summarize(load_cohort(ROOT / "results"))
-        self.assertEqual(summary["cohort"]["n_patients"], 18)
-        self.assertEqual(summary["cohort"]["wins"], 12)
-        self.assertEqual(summary["cohort"]["losses"], 6)
+        self.assertEqual(summary["cohort"]["n_patients"], 37)
+        self.assertEqual(summary["cohort"]["wins"], 30)
+        self.assertEqual(summary["cohort"]["losses"], 7)
         self.assertAlmostEqual(
-            summary["cohort"]["mean_objective_improvement_pct"], 9.336108, places=6
+            summary["cohort"]["mean_objective_improvement_pct"], 12.141760, places=6
         )
         self.assertAlmostEqual(
             summary["cohort"][
                 "mean_objective_improvement_excluding_two_largest_gains_pct"
             ],
-            4.308378,
+            9.460490,
             places=6,
         )
         self.assertEqual(
-            len(summary["review_priorities"]["focused_patients"]), 8
+            len(summary["review_priorities"]["focused_patients"]), 9
         )
         self.assertEqual(
             summary["timing"]["resumed_wall_time_patients"],
-            ["Lung_Patient_11"],
+            ["Lung_Patient_11", "Lung_Patient_22"],
         )
         self.assertEqual(
-            summary["timing"]["patients_with_full_run_wall_time"], 17
+            summary["timing"]["patients_with_full_run_wall_time"], 35
         )
         markdown = render_markdown(summary)
         self.assertIn("All aggregate values are arithmetic means", markdown)
