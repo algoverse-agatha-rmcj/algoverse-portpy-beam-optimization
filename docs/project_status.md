@@ -1,6 +1,6 @@
 # Project status and unfinished work
 
-Updated 2026-08-26. This is the repository backlog; meeting transcripts and Slack determine
+Updated 2026-09-09. This is the repository backlog; meeting transcripts and Slack determine
 individual ownership.
 
 ## Completed
@@ -8,8 +8,8 @@ individual ownership.
 - The ASCI abstract registration was submitted; the full paper is now the deadline-driving
   deliverable.
 - The no-180 genetic algorithm runs end to end and checkpoints after every generation.
-- Patients 2–6 have committed seed-0 GA results, full-resolution clinician comparisons,
-  and three-page DVH reports.
+- All 37 cohort patients have committed seed-0 GA results, full-resolution clinician
+  comparisons, and three-page DVH reports.
 - GA winners and clinician angles are re-solved at the same resolution before comparison.
 - Patient data can be downloaded one selected beam set at a time and removed after bundle
   validation.
@@ -19,8 +19,8 @@ individual ownership.
   angles from Patient 11 onward. See the README section "Beam IDs do not encode gantry
   angles"; guarded by `tests/test_beam_angles.py`.
 - The pipeline accepts any patient in the catalogue, not only Patients 3-6.
-- The matched seed-0 cohort now contains 18 usable patients (Patients 2-11 and 14-21),
-  with Patients 12 and 13 excluded for documented upstream data defects.
+- The matched seed-0 cohort now contains 37 usable patients (Patients 2-11, 14-34, and
+  36-41), with Patients 12, 13, and 35 excluded for documented upstream data defects.
 - The Algoverse Patient 21 protocol-lock pilot, batch ID
   `lung-seed0-pilot-20260826-v2`, completed the 40-generation GA, both clinical
   comparisons, DVH generation, bundle validation, and raw-data cleanup. Its reduced
@@ -31,13 +31,14 @@ individual ownership.
   manifest, exact candidate-pool validation, run/data/code provenance, and
   protocol-fingerprinted caches. These safeguards only record or reject state; they do not
   give new patients more optimizer data, attempts, or compute. Corrected timing and
-  objective-term exports remain new-only analysis fields unless old cases are re-solved.
+  objective-term exports were new-only analysis fields until the 2026-09-09 re-solve of
+  Patients 2-20 (see "Objective-term backfill" below).
 - `scripts/analyze_cohort.py` regenerates the cohort evidence from the authoritative
   full-resolution comparisons using arithmetic means and explicit outlier disclosure.
 - `scripts/generate_paper_assets.py` regenerates the manuscript cohort table and vector
   per-patient objective figure from the same summary.
 - Patient 11's timing discrepancy is resolved: it resumed with 653 cached solves, so its
-  456-second wall time is a process segment and is excluded from the 16-patient full-run mean.
+  456-second wall time is a process segment and is excluded from the 35-patient full-run mean.
 
 ## Active priorities
 
@@ -45,8 +46,8 @@ individual ownership.
    the shared paper, then send that draft to Ruizhe for the review promised on the PI call.
 2. Get clinical review of the target-dose language, left-lung maximum, Patient 8 violation,
    and Patients 14/17 using `docs/clinical_review_checklist.md`.
-3. Export objective terms on future full-resolution comparisons so the team can distinguish
-   target-coverage gains from organ-at-risk penalties instead of inferring from total score.
+3. Finish the objective-term backfill for Patients 2-20 so the per-term decomposition covers
+   all 37 patients instead of the 20 newer cases (see "Objective-term backfill" below).
 4. Have a second team member review the GA, clinical-comparison, aggregation, and reporting
    logic in depth.
 5. Repeat the GA across several seeds and report variability; one seed is not evidence of
@@ -64,12 +65,31 @@ individual ownership.
    claim should describe a **sampled** subset with the sampling rule stated, not "the PortPy
    cohort".
 
+## Objective-term backfill (started 2026-09-09)
+
+`objective_terms` exists only for Patients 21-41; Patients 2-20 predate that export, which is
+why the per-term decomposition currently covers 20 of 37 patients. `clinical_compare.py`
+already emits the field, so the backfill is a re-run rather than a code change.
+
+Two facts established on 2026-09-09:
+
+- **The re-solve reproduces exactly.** Patients 2 and 6 returned objectives identical to the
+  committed values to four decimal places with identical beam sets, so adopting backfilled
+  files moves no published number. Patient 2's rescore also emits a normal `GA` key matching
+  its legacy `GA_B_no180` arm, confirming `analyze_cohort.py`'s fallback.
+- **It requires a re-download.** The raw data for Patients 2-20 was deleted after the original
+  batch. `data/Lung_Patient_N/` still exists for them as a ~292 KB stub holding only `Beams/`
+  metadata, so a directory-existence check wrongly reports the data as present; test for
+  `StructureSet_MetaData.json` instead. Patient 6 additionally needed a re-pull with
+  `--beam-mode ga`, having originally been fetched with planner beams only.
+
+Backfilled runs write to `*_clinical_metrics_full_resolution_rescored.json` side files so the
+authoritative comparisons are never overwritten before the objectives are verified.
+
 ## Repository administration
 
 - Enable `main` branch protection in GitHub so changes require a reviewed pull request.
 - Remove merged/stale remote branches only after confirming they are reachable from `main`.
-- Update the GitHub repository description, which still says "prostate-cancer" although the
-  committed experiments use lung cases.
 
 ## Useful improvements after the core study
 

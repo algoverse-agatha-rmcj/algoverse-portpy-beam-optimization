@@ -1,5 +1,10 @@
 # Large batch handoff
 
+> **Historical, as of 2026-09-09.** The extension this document plans was run and completed:
+> the cohort is now 37 patients (2-11, 14-34, 36-41), not the 18 described below. Kept for the
+> pilot record and the launch procedure, which are still correct. For current cohort state see
+> `README.md` and `docs/project_status.md`.
+
 ## Canonical pilot
 
 Refer to the completed test as the **Algoverse Patient 21 protocol-lock pilot**. Its
@@ -49,9 +54,10 @@ pilot before scaling.
 
 ## Starting the large batch
 
-The primary cohort now has 18 usable patients: Patients 2 through 11 and 14 through 21.
-Patients 12 and 13 are excluded because of upstream PortPy data defects. Do not include
-any completed patient in the extension batch.
+At the time of this handoff the primary cohort had 18 usable patients: Patients 2 through 11
+and 14 through 21, with Patients 12 and 13 excluded for upstream PortPy data defects. That
+extension has since completed; the cohort is now 37 patients and Patient 35 joined the
+exclusion list. Do not include any completed patient in an extension batch.
 
 Before running, Milen must provide the exact new patient list and the sampling rule used
 to choose it. Do not infer a list or describe a sampled subset as the full PortPy lung

@@ -8,9 +8,10 @@ radiotherapy beam-angle optimization by testing a genetic algorithm on open-sour
 
 Experiment outputs are organized by patient under [`results/`](results/). Each completed
 patient bundle keeps the GA result JSON, clinician comparison metrics, and its
-dose-volume histogram (DVH) together. The matched primary cohort contains 18
-seed-0 patients: Patients 2-11 and 14-21. Patients 12 and 13 are excluded because
-their upstream PortPy data cannot produce comparable complete results.
+dose-volume histogram (DVH) together. The matched primary cohort contains 37
+seed-0 patients: Patients 2-11, 14-34, and 36-41. Patients 12, 13, and 35 are
+excluded because their upstream PortPy data cannot produce comparable complete
+results.
 
 ## Frozen primary cohort and safe batching
 
@@ -22,9 +23,10 @@ downsampling recipe, and full-resolution rescoring of both plans.
 
 The safeguards are passive: manifests, hashes, and validation do not expose the GA
 to more patient data, evaluations, seeds, or search time. New results may record
-corrected solver timing and objective-term detail, but combined old-plus-new cohort
-analysis must use only the fields shared by both generations of artifacts. Never run
-several seeds and select the best one for the primary cohort.
+corrected solver timing and objective-term detail, and combined old-plus-new cohort
+analysis must use only the fields shared by both generations of artifacts until the
+objective-term backfill for Patients 2-20 completes (see `docs/project_status.md`).
+Never run several seeds and select the best one for the primary cohort.
 
 Launch a cohort extension through the batch runner with a stable, descriptive ID:
 
