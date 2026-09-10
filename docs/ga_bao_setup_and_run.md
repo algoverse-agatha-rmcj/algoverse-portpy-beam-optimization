@@ -85,19 +85,19 @@ Confirm with `dir ga_bao.py` — it should list the file, and the prompt should 
 > means the terminal was still in your home folder. Run the `cd` line above and try again.
 
 ## Step 3 — run the genetic algorithm
-Full real run (population 20, 40 generations, 24-angle pool, pick 7 beams):
+Full run with the primary protocol (population 20, 40 generations, pick 7 beams from the patient's 24–30-beam pool):
 ```powershell
 C:\Users\<you>\anaconda3\envs\portpy\python.exe ga_bao.py --patient Lung_Patient_3 --k 7 --pop 20 --gens 40
 ```
 Using the full path to `python.exe` guarantees the correct environment, so you don't need `conda activate` first.
 
-Quick 2-minute sanity check (smaller config) before the long run:
+Short software check (smaller config) before the long run; it still pays the one-time down-sample:
 ```powershell
 C:\Users\<you>\anaconda3\envs\portpy\python.exe ga_bao.py --patient Lung_Patient_3 --k 5 --pop 6 --gens 3
 ```
 
 ## What you will see
-- First ~2 minutes: `[setup] down-sampling 24-beam pool...` — the one-time down-sample; no per-generation output yet.
+- First, a few minutes of `[setup] down-sampling N-beam pool (one-time)...` — no per-generation output yet.
 - Then one line per generation, live: `gen 0 | gen-best 94.30 | overall-best 94.30 | angles [...] | solves 20`
 - The fitness (lower = better) should trend downward across generations.
 - When finished: a `=== RESULT ===` summary, and results saved under
@@ -119,9 +119,9 @@ C:\Users\<you>\anaconda3\envs\portpy\python.exe ga_bao.py --patient Lung_Patient
 - `--pool` — the candidate beam IDs. By default, the code reads each patient's real
   gantry-angle metadata, selects the 15-degree grid, excludes every beam at 180 degrees,
   and adds missing non-180 clinician beams. Beam IDs do not encode angles.
-- `--k` — how many beams to select (7 matches the PortPy benchmark).
+- `--k` — how many beams to select. The primary protocol uses 7.
 - `--seed` — random seed. Seed 0 is the primary cohort. Additional seeds form a separate
   robustness study; summarize all predeclared seeds rather than selecting their best result.
-- `--no-downsample` — use full-resolution matrices (slower per solve; for comparing against the expert plan, not the MILP).
+- `--no-downsample` — search on full-resolution matrices (much slower per solve, more memory). Not part of the primary protocol.
 - `--out` — optional results filename; by default it is organized under
   `results/<patient>/ga_runs/` and includes the resolution and seed.
