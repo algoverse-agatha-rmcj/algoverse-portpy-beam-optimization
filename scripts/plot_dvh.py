@@ -227,7 +227,7 @@ def load_criteria(path):
 def check_provenance(C, raw, criteria_path):
     """Refuse to caption curves with numbers measured on a different plan or resolution.
 
-    Correctness guard: scoring GA angles on a down-sampled dose
+    Jordan's correctness point from meeting 6: scoring GA angles on a down-sampled dose
     matrix while the clinician baseline is at full resolution invalidates the comparison.
     The same applies between the curves and the table printed beside them.
     """
