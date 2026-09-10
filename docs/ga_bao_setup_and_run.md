@@ -43,7 +43,7 @@ pip install "numpy==2.4.6"
 ## 5. Get the code (two repos, side by side)
 Put both repos in the SAME parent folder (example uses Downloads):
 ```bash
-cd C:\Users\jpwun\Downloads
+cd C:\Users\<you>\Downloads
 git clone https://github.com/algoverse-agatha-rmcj/algoverse-portpy-beam-optimization.git
 git clone https://github.com/PortPy-Project/PortPy.git
 cd PortPy
@@ -54,7 +54,7 @@ PortPy is pinned to tag **v1.1.4** because its `master` branch has Python-3.12-o
 ## 6. Apply the PortPy down-sampler patch (required)
 PortPy v1.1.4's down-sampler crashes on the current data format. Apply the one-line patch (idempotent, makes a backup):
 ```bash
-cd C:\Users\jpwun\Downloads\algoverse-portpy-beam-optimization
+cd C:\Users\<you>\Downloads\algoverse-portpy-beam-optimization
 python scripts/patch_portpy_downsampler.py
 ```
 Re-run this after any `pip install`/reinstall of PortPy.
@@ -65,7 +65,7 @@ off-grid clinician beams and keeps the large data outside the repo:
 ```bash
 python scripts/download_patient_data.py Lung_Patient_3 --beam-mode ga
 ```
-Data lands in `C:\Users\jpwun\Downloads\data\Lung_Patient_3` — a sibling of the repo, which is where the code expects it.
+Data lands in `C:\Users\<you>\Downloads\data\Lung_Patient_3` — a sibling of the repo, which is where the code expects it.
 
 ---
 
@@ -77,23 +77,23 @@ Easiest is inside VS Code: **Terminal → New Terminal**. Any PowerShell / Anaco
 ## Step 2 — move into the repo folder
 The script and its default data path only work if you run from the repo folder:
 ```powershell
-cd "C:\Users\jpwun\Downloads\algoverse-portpy-beam-optimization"
+cd "C:\Users\<you>\Downloads\algoverse-portpy-beam-optimization"
 ```
 Confirm with `dir ga_bao.py` — it should list the file, and the prompt should end with `...\algoverse-portpy-beam-optimization>`.
 
-> **Common error:** `can't open file 'C:\Users\jpwun\ga_bao.py': No such file or directory`
+> **Common error:** `can't open file 'C:\Users\<you>\ga_bao.py': No such file or directory`
 > means the terminal was still in your home folder. Run the `cd` line above and try again.
 
 ## Step 3 — run the genetic algorithm
 Full real run (population 20, 40 generations, 24-angle pool, pick 7 beams):
 ```powershell
-C:\Users\jpwun\anaconda3\envs\portpy\python.exe ga_bao.py --patient Lung_Patient_3 --k 7 --pop 20 --gens 40
+C:\Users\<you>\anaconda3\envs\portpy\python.exe ga_bao.py --patient Lung_Patient_3 --k 7 --pop 20 --gens 40
 ```
 Using the full path to `python.exe` guarantees the correct environment, so you don't need `conda activate` first.
 
 Quick 2-minute sanity check (smaller config) before the long run:
 ```powershell
-C:\Users\jpwun\anaconda3\envs\portpy\python.exe ga_bao.py --patient Lung_Patient_3 --k 5 --pop 6 --gens 3
+C:\Users\<you>\anaconda3\envs\portpy\python.exe ga_bao.py --patient Lung_Patient_3 --k 5 --pop 6 --gens 3
 ```
 
 ## What you will see

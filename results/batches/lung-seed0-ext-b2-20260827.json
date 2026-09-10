@@ -89,7 +89,7 @@
     "Lung_Patient_35": {
       "status": "failed",
       "updated_at_utc": "2026-08-27T09:00:25+00:00",
-      "error": "CalledProcessError: Command '['/Users/milen/dev/projects/research/portpy-venv/bin/python', 'ga_bao.py', '--patient', 'Lung_Patient_35', '--k', '7', '--pop', '20', '--gens', '40', '--mutation-rate', '0.15', '--seed', '0']' returned non-zero exit status 1."
+      "error": "CalledProcessError: Command '['../portpy-venv/bin/python', 'ga_bao.py', '--patient', 'Lung_Patient_35', '--k', '7', '--pop', '20', '--gens', '40', '--mutation-rate', '0.15', '--seed', '0']' returned non-zero exit status 1."
     }
   },
   "completed_at_utc": "2026-08-27T09:00:25+00:00"

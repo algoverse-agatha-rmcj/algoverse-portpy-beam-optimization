@@ -19,30 +19,19 @@ The GA produced a lower objective for 30 of 37 patients, with an arithmetic mean
 of 12.14%. Patients 14 and 38 are the two largest gains; the arithmetic mean is 9.46% when
 both are excluded as a sensitivity calculation.
 
-## Cohort aggregate figures (2026-09-09, built outside this repo)
+## Cohort aggregate figures
 
-Meeting 10 asked for an aggregate that summarizes all 37 patients alongside the
-single-patient DVH. An averaged DVH was considered and rejected: between-patient anatomy
-variance dwarfs the GA-versus-clinician difference, so the mean curves overlap and show
-nothing. The aggregate is instead a per-term decomposition of the objective gap.
+The manuscript's remaining figures are built outside this repository from the same
+`*_full_resolution.json` comparisons.
 
-Those figures are PDFs in OneDrive under
-`Summer 26/Algoverse/Research Group/Results/`, with `make_figures.py` beside them:
+- **No averaged DVH.** Between-patient anatomy varies far more than the GA-versus-clinician
+  difference, so mean curves overlap and show nothing. The cohort aggregate is instead a
+  per-term decomposition of the objective gap: PTV underdose and overdose penalties supply 83%
+  of the mean 17.22-point objective difference across all 37 patients.
+- **Clinical metrics in Gy** accompany the decomposition, because objective terms are weighted
+  quadratic penalties rather than doses.
+- **The single-patient DVH names its patient.** Patient 18 (+11.85%) is shown because it is the
+  closest of the 37 to the cohort mean of 12.14%, not because of the size of its gain.
 
-- `Fig_objective_term_drivers.pdf` — per-term decomposition, two panels (objective points
-  recovered, and percent improvement per term). PTV underdose and overdose account for
-  83% of the mean 17.22-point gap. **Now n=37**, the full cohort, after the objective-term
-  backfill was verified and adopted on 2026-09-10.
-- `Fig_cohort_clinical_metrics.pdf` — the same comparison in Gy across all 37 patients,
-  with a per-patient count column. The mean and the count disagree on spinal cord and left
-  lung; both are shown.
-- `Fig_per_patient_improvement.pdf` — PDF form of `objective_improvement.svg`, with the
-  arithmetic mean marked.
-- `Fig_example_DVH_P18_nearest_mean.pdf` — the single-patient DVH. Patient 18 (+11.85%) is
-  the closest of the 37 to the cohort mean of 12.14%; P19 is the alternate. Meeting 10
-  requires the patient ID be stated in the caption.
-- `equation.tex` — the bilevel objective, verified against
-  `portpy/photon/optimization.py` and consistent with `docs/fitness_function.pdf`.
-
-Percentages in these figures are ratios of cohort means, never means of per-patient ratios:
-small denominators (left lung, RIND_4) make per-patient ratios swing past -1000%.
+Term percentages are ratios of cohort totals, never means of per-patient ratios: small
+denominators (left lung, the outermost ring) make per-patient ratios swing past -1000%.

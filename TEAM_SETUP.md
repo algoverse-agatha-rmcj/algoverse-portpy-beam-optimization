@@ -1,4 +1,4 @@
-# PortPy Setup Guide (Beam-Angle-Optimization Team)
+# PortPy setup guide
 
 This walks you from a **fresh machine** to a **working PortPy environment** where you can
 run the example notebooks (starting with `examples/1_basic_tutorial.ipynb`) in VS Code,
