@@ -110,8 +110,8 @@ beamlet down-sampling. Results embed patient, configuration, data, and code prov
 caches are rejected if any of it differs. See [`docs/batch_protocol.md`](docs/batch_protocol.md)
 before extending the cohort.
 
-Further reading: [`docs/ga_bao_walkthrough.md`](docs/ga_bao_walkthrough.md) explains
-`ga_bao.py` line by line, and [`docs/fitness_function.pdf`](docs/fitness_function.pdf)
+Further reading: [`docs/ga_bao_walkthrough.md`](docs/ga_bao_walkthrough.md) walks through
+`ga_bao.py` section by section, and [`docs/fitness_function.md`](docs/fitness_function.md)
 explains the objective.
 
 ## Beam IDs do not encode gantry angles
@@ -148,14 +148,17 @@ Never reintroduce `range(0, 72, 3)`, a literal beam `36`, or `beam_id * 5`.
 `tests/test_beam_angles.py` guards this, including a regression case built from the real
 `Lung_Patient_15` layout.
 
-## Data and licensing
+## License and data
 
-Patient data comes from the PortPy dataset on Hugging Face
-([`PortPy-Project/PortPy_Dataset`](https://huggingface.co/datasets/PortPy-Project/PortPy_Dataset)),
-released under **CC BY-NC 4.0** and derived from the TCIA NSCLC-Radiomics collection. No raw
-patient data is stored here. The committed results are dose metrics and figures derived from
-that dataset and carry the same attribution and non-commercial terms. PortPy itself is
-distributed under Apache 2.0 with the Commons Clause, for non-commercial academic use.
+- **Code:** the source code is released under the [MIT license](LICENSE).
+- **Results:** everything under `results/` is derived from the PortPy dataset and is released
+  under **CC BY-NC 4.0**, the dataset's own license. See [`results/LICENSE.md`](results/LICENSE.md).
+- **Data:** patient data comes from the PortPy dataset on Hugging Face
+  ([`PortPy-Project/PortPy_Dataset`](https://huggingface.co/datasets/PortPy-Project/PortPy_Dataset)),
+  derived from the TCIA NSCLC-Radiomics collection. No raw patient data is stored here.
+- **PortPy:** the library this code depends on is distributed under Apache 2.0 with the
+  Commons Clause, for non-commercial academic use. Using this code therefore also means
+  following PortPy's terms.
 
 If you use this work, please also cite PortPy as its maintainers request in the
 [PortPy README](https://github.com/PortPy-Project/PortPy#license).
