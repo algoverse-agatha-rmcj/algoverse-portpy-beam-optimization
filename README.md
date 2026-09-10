@@ -22,10 +22,9 @@ candidate grid with 180 degrees excluded, the existing `(6, 6, 1)` / `4`
 downsampling recipe, and full-resolution rescoring of both plans.
 
 The safeguards are passive: manifests, hashes, and validation do not expose the GA
-to more patient data, evaluations, seeds, or search time. New results may record
-corrected solver timing and objective-term detail, and combined old-plus-new cohort
-analysis must use only the fields shared by both generations of artifacts until the
-objective-term backfill for Patients 2-20 completes (see `docs/project_status.md`).
+to more patient data, evaluations, seeds, or search time. Objective-term detail now
+covers all 37 patients after a verified re-solve of Patients 2-20; solver timing still
+differs between the two generations of artifacts and must not be pooled.
 Never run several seeds and select the best one for the primary cohort.
 
 Launch a cohort extension through the batch runner with a stable, descriptive ID:

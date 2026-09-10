@@ -103,4 +103,4 @@ The 7 losses and the two largest gains are shown together. Clinical deltas are G
 | P14 | largest GA gain | +65.83% | +1.24 | -4.37 | -2.70 | -3.53 | -5.14 | -1.64 | +0.20 | -0.28 |
 | P38 | largest GA gain | +52.30% | +0.48 | -3.51 | -2.13 | +0.87 | +0.00 | -1.49 | +0.81 | +0.97 |
 
-Across the 7 loss cases, mean objective improvement is -1.49%. Their largest absolute PTV D95 change is 0.08 Gy. P14 and P17 instead recover 1.24 Gy and 1.46 Gy of PTV D95, respectively; those coverage changes coincide with the two largest objective gains, but objective-term exports are needed before attributing causality.
+Across the 7 loss cases, mean objective improvement is -1.49%. Their largest absolute PTV D95 change is 0.08 Gy. The two largest gains, P14 and P38, change PTV D95 by +1.24 Gy and +0.48 Gy, respectively.

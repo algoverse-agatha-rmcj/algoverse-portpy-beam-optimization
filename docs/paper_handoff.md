@@ -32,5 +32,5 @@ Use `results/paper/objective_improvement.svg`. Suggested caption:
 Send `docs/clinical_review_checklist.md` with the draft to Agatha and Ruizhe. Do not strengthen
 the claim beyond `comparable to clinician-selected angles` until the target-dose language,
 tumor laterality, lung maximum-dose results, and protocol-limit violations have been reviewed.
-Objective-term exports cover only the 20 newer cases, and the study still lacks repeat seeds and
-a global-optimum baseline. The Limitations section states each omission directly.
+Objective-term exports now cover all 37 patients, but the study still lacks repeat seeds and a
+global-optimum baseline. The Limitations section states each omission directly.

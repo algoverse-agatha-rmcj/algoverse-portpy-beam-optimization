@@ -31,8 +31,8 @@ Those figures are PDFs in OneDrive under
 
 - `Fig_objective_term_drivers.pdf` — per-term decomposition, two panels (objective points
   recovered, and percent improvement per term). PTV underdose and overdose account for
-  ~79% of the mean 15.90-point gap. **Currently n=20**, pending the objective-term backfill
-  in `docs/project_status.md`.
+  83% of the mean 17.22-point gap. **Now n=37**, the full cohort, after the objective-term
+  backfill was verified and adopted on 2026-09-10.
 - `Fig_cohort_clinical_metrics.pdf` — the same comparison in Gy across all 37 patients,
   with a per-patient count column. The mean and the count disagree on spinal cord and left
   lung; both are shown.

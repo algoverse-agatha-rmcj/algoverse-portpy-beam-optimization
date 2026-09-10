@@ -28,13 +28,12 @@ change, from a 25.14% improvement at reduced resolution to a 1.40% loss at full 
 These reversals support using the matched full-resolution re-solves, rather than the search
 fitness, for the primary comparison.
 
-Objective-term exports were available for the 20 newer cases, Patients 21 through 41 except
-Patient 35. Within this subset, the combined PTV penalty was lower under the GA angles in 19
-of 20 patients, and the combined organ-at-risk penalty was lower in 16 of 20. Averaged across
-the subset, the clinician-minus-GA objective differences were 12.55 objective units for PTV
-terms, 2.03 for organ-at-risk terms, 0.24 for ring terms, and 0.99 for fluence smoothness.
-Thus, the target terms accounted for most of the mean objective reduction in the cases where
-term-level analysis was available.
+Objective-term exports were available for all 37 patients. The combined PTV penalty was lower
+under the GA angles in 32 of 37 patients, and the combined organ-at-risk penalty was lower in
+27 of 37. Averaged across the cohort, the clinician-minus-GA objective differences were 14.34
+objective units for PTV terms, 1.79 for organ-at-risk terms, 0.13 for ring terms, and 0.95 for
+fluence smoothness, summing to the mean objective difference of 17.22 units. The target terms
+therefore accounted for 83% of the mean objective reduction.
 
 The decomposition also separated two different patient-level outcomes. For Patient 38,
 129.42 of the 131.18 objective-unit difference came from lower PTV penalties, and PTV D95
@@ -49,8 +48,8 @@ Mean PTV D95 was 59.68 Gy under the GA angles and 59.54 Gy under the clinician-s
 angles, against a 60 Gy prescription. Across the seven objective-loss cases, the largest
 absolute change in PTV D95 was 0.08 Gy. The three largest objective gains coincided with
 increased target coverage: PTV D95 increased by 1.24 Gy for Patient 14, 0.48 Gy for Patient
-38, and 1.46 Gy for Patient 17. Because objective-term exports were unavailable for Patients
-14 and 17, those two associations are descriptive rather than a decomposition of the cause.
+38, and 1.46 Gy for Patient 17. Lower PTV penalties supplied 109.08 of the 124.06 objective-unit
+difference for Patient 14 and 134.73 of the 137.52 units for Patient 17.
 
 Organ-at-risk metrics moved in both directions (Table 1). Mean esophagus dose decreased by
 0.49 Gy, and mean heart dose decreased by 0.62 Gy across the 36 patients with heart
@@ -80,9 +79,8 @@ these values because those patients ran in three concurrent lanes.
 
 The GA found a lower full-resolution PortPy objective for 30 of 37 patients, and the
 sensitivity mean remained positive after removing the two largest gains. The seven losses
-were generally small and did not produce a large change in PTV D95. In the 20 patients with
-term-level exports, PTV penalties were lower in 19 cases and accounted for most of the mean
-objective reduction. The gains for Patients 14, 17, and 38 also coincided with recovery of
+were generally small and did not produce a large change in PTV D95. PTV penalties were lower
+in 32 of 37 patients and accounted for 83% of the mean objective reduction. The gains for Patients 14, 17, and 38 also coincided with recovery of
 target coverage relative to the clinician-angle re-solves.
 
 The clinical metrics do not support describing every lower objective as a uniformly better
@@ -107,9 +105,8 @@ initializations or demonstrate convergence. The 37 cases are a sequential subset
 released PortPy lung patients rather than a random sample of the full catalogue. Three cases
 were excluded for documented upstream data defects that prevented a matched comparison.
 
-Objective-term exports are available for only the 20 newer cases. The full-cohort clinical
-criteria remain comparable, but term-level claims must retain the 20-patient denominator.
-Tumor laterality is also unavailable in the current analysis, which limits interpretation of
+Objective-term exports for Patients 2 through 20 were recovered by re-solving the committed
+beam sets, which reproduced every committed objective to within 0.001%. Tumor laterality is also unavailable in the current analysis, which limits interpretation of
 the left-lung and right-lung maximum-dose results. Clinical review is still required for the
 target-dose language, side-specific lung findings, and protocol-limit violations.
 

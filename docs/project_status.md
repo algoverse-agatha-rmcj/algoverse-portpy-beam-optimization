@@ -46,8 +46,10 @@ individual ownership.
    the shared paper, then send that draft to Ruizhe for the review promised on the PI call.
 2. Get clinical review of the target-dose language, left-lung maximum, Patient 8 violation,
    and Patients 14/17 using `docs/clinical_review_checklist.md`.
-3. Finish the objective-term backfill for Patients 2-20 so the per-term decomposition covers
-   all 37 patients instead of the 20 newer cases (see "Objective-term backfill" below).
+3. ~~Objective-term backfill.~~ **Done 2026-09-10.** Patients 2-11 and 14-20 were rescored,
+   verified against their committed objectives (worst drift 0.001%, identical beam sets), and
+   merged into the committed comparisons. The per-term decomposition now covers all 37
+   patients (see "Objective-term backfill" below).
 4. Have a second team member review the GA, clinical-comparison, aggregation, and reporting
    logic in depth.
 5. Repeat the GA across several seeds and report variability; one seed is not evidence of
@@ -65,11 +67,12 @@ individual ownership.
    claim should describe a **sampled** subset with the sampling rule stated, not "the PortPy
    cohort".
 
-## Objective-term backfill (started 2026-09-09)
+## Objective-term backfill (completed 2026-09-10)
 
-`objective_terms` exists only for Patients 21-41; Patients 2-20 predate that export, which is
-why the per-term decomposition currently covers 20 of 37 patients. `clinical_compare.py`
-already emits the field, so the backfill is a re-run rather than a code change.
+`objective_terms` was originally exported only for Patients 21-41; Patients 2-20 predated that
+export. They were re-solved and their terms merged, so the per-term decomposition now covers
+all 37 patients. `clinical_compare.py` already emitted the field, so the backfill was a re-run
+rather than a code change.
 
 Two facts established on 2026-09-09:
 
