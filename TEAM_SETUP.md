@@ -1,4 +1,4 @@
-# PortPy Setup Guide (Beam-Angle-Optimization Team)
+# PortPy setup guide
 
 This walks you from a **fresh machine** to a **working PortPy environment** where you can
 run the example notebooks (starting with `examples/1_basic_tutorial.ipynb`) in VS Code,
@@ -20,7 +20,7 @@ There are **two separate git repos**, kept side-by-side in one parent folder:
 
 ```
 <some-folder>/                              <- e.g. C:\Users\<you>\Downloads
-├── algoverse-portpy-beam-optimization/     <- OUR project repo (this guide + our BAO code)
+├── algoverse-portpy-beam-optimization/     <- this repo (this guide + the BAO code)
 │   ├── scripts/
 │   │   ├── download_patient_data.py
 │   │   └── patch_portpy_downsampler.py
@@ -32,9 +32,9 @@ There are **two separate git repos**, kept side-by-side in one parent folder:
     └── Lung_Patient_3/
 ```
 
-- **Our repo** (`algoverse-portpy-beam-optimization`) holds our own algorithm code and docs.
+- **This repo** (`algoverse-portpy-beam-optimization`) holds the algorithm code and docs.
 - **PortPy** is the upstream library + example notebooks; we don't fork it, we just clone it.
-- **`data/`** is a sibling of both, so both the notebooks (`../../data`) and our download
+- **`data/`** is a sibling of both, so both the notebooks (`../../data`) and the download
   script resolve to the same place — and neither repo tracks the gigabytes.
 
 > 🔑 **Keep both repos in the SAME parent folder** (the `<some-folder>` above). The data
@@ -112,7 +112,7 @@ python -m ipykernel install --user --name portpy --display-name "Python 3.11 (po
 
 Pick a parent folder (this guide uses `Downloads`) and put **both** repos in it.
 
-**a) Our project repo** — you've probably already cloned it (you're reading this from it).
+**a) This repo** — you've probably already cloned it (you're reading this from it).
 If not:
 ```bash
 cd ~/Downloads
@@ -121,7 +121,7 @@ git clone https://github.com/algoverse-agatha-rmcj/algoverse-portpy-beam-optimiz
 
 **b) PortPy (the library) — clone upstream as a sibling, and pin it to `v1.1.4`:**
 ```bash
-cd ~/Downloads          # same parent folder as our repo
+cd ~/Downloads          # same parent folder as this repo
 git clone https://github.com/PortPy-Project/PortPy.git
 cd PortPy
 git checkout -b research-v1.1.4 v1.1.4
@@ -171,7 +171,7 @@ Expect `patched successfully` (or `Already patched`). **Re-run it after any
 
 ## 7. Download patient data from HuggingFace
 
-Use the helper script in **our repo**. Run it from the project repo's root, with the
+Use the helper script in **this repo**. Run it from the project repo's root, with the
 `portpy` env active:
 
 ```bash
@@ -290,7 +290,7 @@ python -m ipykernel install --user --name portpy --display-name "Python 3.11 (po
 
 # 3. code: both repos in the same parent folder
 cd ~/Downloads
-git clone https://github.com/algoverse-agatha-rmcj/algoverse-portpy-beam-optimization.git   # our repo
+git clone https://github.com/algoverse-agatha-rmcj/algoverse-portpy-beam-optimization.git   # this repo
 git clone https://github.com/PortPy-Project/PortPy.git                        # the library
 cd PortPy && git checkout -b research-v1.1.4 v1.1.4 && cd ..
 

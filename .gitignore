@@ -8,3 +8,7 @@ __pycache__/
 *.npz
 results/batch/*.log
 results/batch/*.pid
+
+# Re-solve side files from the objective-term backfill. Their objective_terms were verified
+# against the committed objectives and merged into *_full_resolution.json.
+*_full_resolution_rescored.json

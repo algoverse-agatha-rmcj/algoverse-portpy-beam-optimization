@@ -43,7 +43,7 @@ pip install "numpy==2.4.6"
 ## 5. Get the code (two repos, side by side)
 Put both repos in the SAME parent folder (example uses Downloads):
 ```bash
-cd C:\Users\jpwun\Downloads
+cd C:\Users\<you>\Downloads
 git clone https://github.com/algoverse-agatha-rmcj/algoverse-portpy-beam-optimization.git
 git clone https://github.com/PortPy-Project/PortPy.git
 cd PortPy
@@ -54,7 +54,7 @@ PortPy is pinned to tag **v1.1.4** because its `master` branch has Python-3.12-o
 ## 6. Apply the PortPy down-sampler patch (required)
 PortPy v1.1.4's down-sampler crashes on the current data format. Apply the one-line patch (idempotent, makes a backup):
 ```bash
-cd C:\Users\jpwun\Downloads\algoverse-portpy-beam-optimization
+cd C:\Users\<you>\Downloads\algoverse-portpy-beam-optimization
 python scripts/patch_portpy_downsampler.py
 ```
 Re-run this after any `pip install`/reinstall of PortPy.
@@ -65,7 +65,7 @@ off-grid clinician beams and keeps the large data outside the repo:
 ```bash
 python scripts/download_patient_data.py Lung_Patient_3 --beam-mode ga
 ```
-Data lands in `C:\Users\jpwun\Downloads\data\Lung_Patient_3` — a sibling of the repo, which is where the code expects it.
+Data lands in `C:\Users\<you>\Downloads\data\Lung_Patient_3` — a sibling of the repo, which is where the code expects it.
 
 ---
 
@@ -77,27 +77,27 @@ Easiest is inside VS Code: **Terminal → New Terminal**. Any PowerShell / Anaco
 ## Step 2 — move into the repo folder
 The script and its default data path only work if you run from the repo folder:
 ```powershell
-cd "C:\Users\jpwun\Downloads\algoverse-portpy-beam-optimization"
+cd "C:\Users\<you>\Downloads\algoverse-portpy-beam-optimization"
 ```
 Confirm with `dir ga_bao.py` — it should list the file, and the prompt should end with `...\algoverse-portpy-beam-optimization>`.
 
-> **Common error:** `can't open file 'C:\Users\jpwun\ga_bao.py': No such file or directory`
+> **Common error:** `can't open file 'C:\Users\<you>\ga_bao.py': No such file or directory`
 > means the terminal was still in your home folder. Run the `cd` line above and try again.
 
 ## Step 3 — run the genetic algorithm
-Full real run (population 20, 40 generations, 24-angle pool, pick 7 beams):
+Full run with the primary protocol (population 20, 40 generations, pick 7 beams from the patient's 24–30-beam pool):
 ```powershell
-C:\Users\jpwun\anaconda3\envs\portpy\python.exe ga_bao.py --patient Lung_Patient_3 --k 7 --pop 20 --gens 40
+C:\Users\<you>\anaconda3\envs\portpy\python.exe ga_bao.py --patient Lung_Patient_3 --k 7 --pop 20 --gens 40
 ```
 Using the full path to `python.exe` guarantees the correct environment, so you don't need `conda activate` first.
 
-Quick 2-minute sanity check (smaller config) before the long run:
+Short software check (smaller config) before the long run; it still pays the one-time down-sample:
 ```powershell
-C:\Users\jpwun\anaconda3\envs\portpy\python.exe ga_bao.py --patient Lung_Patient_3 --k 5 --pop 6 --gens 3
+C:\Users\<you>\anaconda3\envs\portpy\python.exe ga_bao.py --patient Lung_Patient_3 --k 5 --pop 6 --gens 3
 ```
 
 ## What you will see
-- First ~2 minutes: `[setup] down-sampling 24-beam pool...` — the one-time down-sample; no per-generation output yet.
+- First, a few minutes of `[setup] down-sampling N-beam pool (one-time)...` — no per-generation output yet.
 - Then one line per generation, live: `gen 0 | gen-best 94.30 | overall-best 94.30 | angles [...] | solves 20`
 - The fitness (lower = better) should trend downward across generations.
 - When finished: a `=== RESULT ===` summary, and results saved under
@@ -119,9 +119,9 @@ C:\Users\jpwun\anaconda3\envs\portpy\python.exe ga_bao.py --patient Lung_Patient
 - `--pool` — the candidate beam IDs. By default, the code reads each patient's real
   gantry-angle metadata, selects the 15-degree grid, excludes every beam at 180 degrees,
   and adds missing non-180 clinician beams. Beam IDs do not encode angles.
-- `--k` — how many beams to select (7 matches the PortPy benchmark).
+- `--k` — how many beams to select. The primary protocol uses 7.
 - `--seed` — random seed. Seed 0 is the primary cohort. Additional seeds form a separate
   robustness study; summarize all predeclared seeds rather than selecting their best result.
-- `--no-downsample` — use full-resolution matrices (slower per solve; for comparing against the expert plan, not the MILP).
+- `--no-downsample` — search on full-resolution matrices (much slower per solve, more memory). Not part of the primary protocol.
 - `--out` — optional results filename; by default it is organized under
   `results/<patient>/ga_runs/` and includes the resolution and seed.

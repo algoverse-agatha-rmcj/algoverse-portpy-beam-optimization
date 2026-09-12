@@ -11,8 +11,8 @@ On the current HuggingFace data format, PortPy v1.1.4's
 
 because the beamlet arrays are shape (1, N, 1) but the code assumes (1, N),
 so indexing `width_mm[0][right_ind]` returns a length-1 array instead of a
-scalar. Down-sampling is required for the beam-angle-optimization benchmark
-(both the MILP and our GA), so this blocks the whole experiment.
+scalar. The GA searches on down-sampled matrices, so this blocks the whole
+experiment.
 
 FIX
 ---

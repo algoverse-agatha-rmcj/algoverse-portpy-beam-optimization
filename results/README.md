@@ -90,7 +90,3 @@ is upstream rather than a bad download.
 Patients 2 and 3 also retain clearly named legacy GA runs for historical
 context; those legacy files are not comparative evidence. The current seed-0 result,
 full-resolution comparison, and matching PDF are the authoritative artifacts in each folder.
-
-The committed PDFs were generated before the 2026-08-12 target-ranking correction. Their
-numeric values and curves remain valid, but PTV bold emphasis must be regenerated from the
-ignored curve caches after this fix reaches the machine that produced them.

@@ -610,14 +610,20 @@ def render_markdown(summary: dict[str, Any]) -> str:
             f"| {_focused_delta(row, 'LUNGS_NOT_GTV mean')} "
             f"| {_focused_delta(row, 'LUNGS_NOT_GTV V20Gy')} |"
         )
+    top_gains = [
+        row for row in priorities["focused_patients"]
+        if row["review_reason"] == "largest GA gain"
+    ]
+    gain_names = " and ".join(
+        row["patient"].replace("Lung_Patient_", "P") for row in top_gains
+    )
+    gain_d95 = " and ".join(f"{row['ptv_d95_delta_gy']:+.2f} Gy" for row in top_gains)
     lines.extend([
         "",
         f"Across the {len(focused_losses)} loss cases, mean objective improvement is "
         f"{priorities['mean_loss_pct']:+.2f}%. Their largest absolute PTV D95 change is "
-        f"{largest_loss_d95_change:.2f} Gy. P14 and P17 "
-        "instead recover 1.24 Gy and 1.46 Gy of PTV D95, respectively; those coverage "
-        "changes coincide with the two largest objective gains, but objective-term "
-        "exports are needed before attributing causality.",
+        f"{largest_loss_d95_change:.2f} Gy. The two largest gains, {gain_names}, change "
+        f"PTV D95 by {gain_d95}, respectively.",
     ])
     lines.append("")
     return "\n".join(lines)

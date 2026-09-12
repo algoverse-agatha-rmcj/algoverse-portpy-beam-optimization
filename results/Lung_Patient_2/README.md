@@ -1,6 +1,8 @@
 # Lung_Patient_2 — GA vs. clinician, first end-to-end comparison
 
-Milen, 2026-07-29. Branch `milen/patient2-expert-pool`. All runs on a Mac.
+The first end-to-end comparison, written 2026-07-29 and run on a single Mac. The cohort-level
+results in `results/cohort_analysis.md` supersede its framing; the numbers below remain valid
+for this patient.
 
 ## Folder contents
 
@@ -76,7 +78,7 @@ not its ceiling.
 **Compute argument:** C(25,7) = 480,700 candidate sets. At 6.8 s/solve exhaustive search
 is ~38 days; the GA reached its answer in 452 solves (~51 min), 0.09% of the space.
 
-## Down-sampling fidelity (Agatha's question)
+## Down-sampling fidelity
 
 The margin is stable across three different discretizations:
 
@@ -95,7 +97,7 @@ down-sampled; **evaluate at full resolution, always.**
 
 Full resolution is also much cheaper than assumed: **42 s/solve**, matrix 386,585 × 6,004,
 and it fits comfortably in memory on a Mac. A complete 720-solve GA at native resolution is ~8 h — an overnight
-job. The team may not need down-sampling at all for single-patient work.
+job, so down-sampling may be unnecessary for single-patient work.
 
 ## Clinical criteria — full resolution (the numbers that matter)
 
@@ -127,12 +129,12 @@ value is a search signal, not a measure of plan quality** — a percentage on th
 has no clinical meaning, and it is quadratic, so a 3.8% objective change is roughly a
 1.9% change in dose error.
 
-## Corrections to team assumptions
+## Scope notes
 
 1. **CompressRTP (NeurIPS 2024) is not a beam-angle paper.** Its examples are
    `fluence_wavelets`, `matrix_sparse_only`, `matrix_sparse_plus_low_rank`; its DVH curves
    compare approximated vs actual dose under sparsification, on a fixed plan. There is no
-   beam-angle result to compare against. Slack action item 1 assumes otherwise.
+   beam-angle result to compare against.
 2. **PortPy 1.1.4 ships no MILP beam-angle optimizer.** Grep for `beam_angle|bao|milp|
    mixed-integer` returns nothing. The "within X% of optimal" claim has no source yet.
 3. **Patient data is ~33 GB each** at `--beam-mode all`, not "multi-GB". Downloading many
@@ -154,8 +156,8 @@ Pages 2 and 3 read
 anything, so the
 figure and this document cannot drift apart. `plot_dvh.py` refuses to draw if that file's
 beam sets or resolution disagree with the cached curves — scoring GA angles down-sampled
-against a full-resolution clinician baseline is exactly the apples-to-apples failure
-Jordan flagged, and it is now a hard error rather than a thing to remember.
+against a full-resolution clinician baseline is not a like-for-like comparison, so it is a
+hard error rather than a thing to remember.
 
 ## Reproduce
 
